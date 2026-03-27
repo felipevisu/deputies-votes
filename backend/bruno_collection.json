@@ -1,0 +1,208 @@
+{
+  "type": "http",
+  "info": {
+    "name": "De Olho Neles Backend",
+    "description": "Bruno collection for De Olho Neles backend API.",
+    "schema": "https://usebruno.com/schema/collection.json"
+  },
+  "requests": [
+    {
+      "name": "List Accounts",
+      "method": "GET",
+      "url": "http://localhost:8080/accounts",
+      "params": [
+        { "name": "page", "value": "0", "enabled": true },
+        { "name": "size", "value": "20", "enabled": true }
+      ]
+    },
+    {
+      "name": "Get Account by ID",
+      "method": "GET",
+      "url": "http://localhost:8080/accounts/{{accountId}}"
+    },
+    {
+      "name": "Create Account",
+      "method": "POST",
+      "url": "http://localhost:8080/accounts",
+      "body": {
+        "type": "json",
+        "content": {
+          "name": "Felipe",
+          "lastName": "Faria",
+          "email": "felipe@example.com"
+        }
+      }
+    },
+    {
+      "name": "Update Account",
+      "method": "PUT",
+      "url": "http://localhost:8080/accounts/{{accountId}}",
+      "body": {
+        "type": "json",
+        "content": {
+          "name": "Felipe",
+          "lastName": "Faria",
+          "email": "felipe@example.com"
+        }
+      }
+    },
+    {
+      "name": "Delete Account",
+      "method": "DELETE",
+      "url": "http://localhost:8080/accounts/{{accountId}}"
+    },
+    {
+      "name": "Toggle Follow Deputy",
+      "method": "PUT",
+      "url": "http://localhost:8080/accounts/{{accountId}}/deputies/{{deputyId}}/follow"
+    },
+    {
+      "name": "List Followed Deputies",
+      "method": "GET",
+      "url": "http://localhost:8080/accounts/{{accountId}}/deputies"
+    },
+    {
+      "name": "List Deputies",
+      "method": "GET",
+      "url": "http://localhost:8080/deputies",
+      "params": [
+        { "name": "accountId", "value": "", "enabled": false },
+        { "name": "followed", "value": "", "enabled": false },
+        { "name": "page", "value": "0", "enabled": true },
+        { "name": "size", "value": "20", "enabled": true }
+      ]
+    },
+    {
+      "name": "Get Deputy by ID",
+      "method": "GET",
+      "url": "http://localhost:8080/deputies/{{deputyId}}",
+      "params": [
+        { "name": "accountId", "value": "", "enabled": false }
+      ]
+    },
+    {
+      "name": "Get Deputy by External ID",
+      "method": "GET",
+      "url": "http://localhost:8080/deputies/external/{{externalId}}"
+    },
+    {
+      "name": "Create Deputy",
+      "method": "POST",
+      "url": "http://localhost:8080/deputies",
+      "body": {
+        "type": "json",
+        "content": {
+          "name": "Ana Souza",
+          "party": "PSD",
+          "state": "SP",
+          "avatar": null,
+          "externalId": null
+        }
+      }
+    },
+    {
+      "name": "Update Deputy",
+      "method": "PUT",
+      "url": "http://localhost:8080/deputies/{{deputyId}}",
+      "body": {
+        "type": "json",
+        "content": {
+          "name": "Ana Souza",
+          "party": "PSD",
+          "state": "SP",
+          "avatar": null,
+          "externalId": null
+        }
+      }
+    },
+    {
+      "name": "Delete Deputy",
+      "method": "DELETE",
+      "url": "http://localhost:8080/deputies/{{deputyId}}"
+    },
+    {
+      "name": "List Proposals",
+      "method": "GET",
+      "url": "http://localhost:8080/proposals",
+      "params": [
+        { "name": "page", "value": "0", "enabled": true },
+        { "name": "size", "value": "20", "enabled": true }
+      ]
+    },
+    {
+      "name": "Get Proposal by ID",
+      "method": "GET",
+      "url": "http://localhost:8080/proposals/{{proposalId}}"
+    },
+    {
+      "name": "Get Proposal by External ID",
+      "method": "GET",
+      "url": "http://localhost:8080/proposals/external/{{externalId}}"
+    },
+    {
+      "name": "Create Proposal",
+      "method": "POST",
+      "url": "http://localhost:8080/proposals",
+      "body": {
+        "type": "json",
+        "content": {
+          "title": "PL 1234/2026 - Reforma Tributaria",
+          "summary": "Simplifica o sistema tributario brasileiro...",
+          "author": "Comissao Especial da Camara",
+          "category": "Economia",
+          "voteDate": "2026-03-25",
+          "externalId": null
+        }
+      }
+    },
+    {
+      "name": "Update Proposal",
+      "method": "PUT",
+      "url": "http://localhost:8080/proposals/{{proposalId}}",
+      "body": {
+        "type": "json",
+        "content": {
+          "title": "PL 1234/2026 - Reforma Tributaria",
+          "summary": "Simplifica o sistema tributario brasileiro...",
+          "author": "Comissao Especial da Camara",
+          "category": "Economia",
+          "voteDate": "2026-03-25",
+          "externalId": null
+        }
+      }
+    },
+    {
+      "name": "Delete Proposal",
+      "method": "DELETE",
+      "url": "http://localhost:8080/proposals/{{proposalId}}"
+    },
+    {
+      "name": "Get Feed",
+      "method": "POST",
+      "url": "http://localhost:8080/feed",
+      "params": [
+        { "name": "page", "value": "0", "enabled": true },
+        { "name": "size", "value": "10", "enabled": true }
+      ],
+      "body": {
+        "type": "json",
+        "content": {
+          "deputyIds": [1, 2, 4, 6, 8]
+        }
+      }
+    },
+    {
+      "name": "Create Vote",
+      "method": "POST",
+      "url": "http://localhost:8080/votes",
+      "body": {
+        "type": "json",
+        "content": {
+          "deputyId": 1,
+          "proposalId": 1,
+          "vote": "SIM"
+        }
+      }
+    }
+  ]
+}

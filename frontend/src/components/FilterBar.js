@@ -12,6 +12,9 @@ const CATEGORIES = [
   { name: "Habitação", emoji: "🏠" },
   { name: "Transporte", emoji: "🚌" },
   { name: "Trabalho", emoji: "💼" },
+  { name: "Plenário", emoji: "⚖️" },
+  { name: "Justiça", emoji: "⚖️" },
+  { name: "Legislativo", emoji: "📜" },
 ];
 
 function FilterBar({ activeFilter, onFilter }) {

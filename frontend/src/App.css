@@ -606,6 +606,32 @@ body {
   color: var(--text-primary);
 }
 
+.modal-search {
+  padding: 12px 20px 0;
+}
+
+.modal-search input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-search input:focus {
+  border-color: var(--accent);
+}
+
+.modal-search input::placeholder {
+  color: var(--text-light);
+}
+
 .modal-body {
   overflow-y: auto;
   padding: 8px 0 20px;

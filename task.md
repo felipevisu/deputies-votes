@@ -1,27 +1,47 @@
-# De Olho Neles
+I need backend built with java and spring that returns these endpoints
+The pagination of all list endpoins should support infinity scrooling
 
-## Contexto
+Implement the models, endpoints, database for the following oprations:
 
-No Brasil é dificil confiar nos politicos, eles dizem uma coisa, mas votam outra.
+## Endpoints
 
-O brasileiro é muito viciado em redes sociais, os político sabem disso e estão muito presentes nas redes.
+### List Deputies
 
-Minha ideia é criar um sistema para monitorar as atividades dos políticos:
+/deputies
 
-- Projetos que eles votaram sim ou não
-- Propostas de projetos
+- A list of brazilian deputies containing name, part, legend
+  This endpoint should have a query parameter to filter deputies that I follow or not
 
-O foco deve ser nos deputados.
+```json
+[
+  {
+    "id": "number",
+    "name": "string",
+    "party": "string",
+    "legend": "string",
+    "avatar": "string",
+    "follow": true
+  }
+]
+```
 
-Porém isto deveria ter um formato parecido com um feed de redes socials, o infinity scroll do instagram.
+### Feed
 
-Quem usa o aplicativo poderia escolher quais politicos seguir, o feed é populado com as atividades deste politico, leis votatadas.
+/feed
 
-Cada item do feed tem um titulo do que é o prjeto, um resumo breve, quem propos, e qual o voto do candidato em questão.
+- A list of deputies activity containing proposal name, deputie vote, author, description, return items only of deputies I follow
+- This endpoint accept a POST request in the body a list of deputies ids where I can filter the feed only with activities of selected deputies.
 
-## Tech
-
-- Crie um app react com javascript que simule este aplicativo
-- Inpire a UI em redes sociais modernas
-- App deve ser facil de usar e intuitivo
-- Foque no feed inicial
+```json
+[
+  {
+    "id": "number",
+    "name": "PL 1234/2026 - Reforma Tributária",
+    "description": "Simplifica o sistema tributário brasileiro, unificando cinco impostos em um único Imposto sobre Bens e Serviços (IBS). Prevê período de transição de 7 anos e cashback para famílias de baixa renda.",
+    "deputieName": "Ana Souza",
+    "deputieParty": "PSD - SP",
+    "vote": "YES",
+    "author": "Dep. Juliana Costa (PSOL-RS)"
+  }
+]
+```

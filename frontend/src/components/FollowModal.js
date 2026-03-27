@@ -1,8 +1,20 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Avatar from "./Avatar";
 
 function FollowModal({ deputies, onToggleFollow, onClose }) {
+  const [search, setSearch] = useState("");
   const followingCount = deputies.filter((d) => d.following).length;
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return deputies;
+    const term = search.toLowerCase();
+    return deputies.filter(
+      (d) =>
+        d.name.toLowerCase().includes(term) ||
+        d.party.toLowerCase().includes(term) ||
+        (d.state || "").toLowerCase().includes(term),
+    );
+  }, [deputies, search]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -18,8 +30,17 @@ function FollowModal({ deputies, onToggleFollow, onClose }) {
             ✕
           </button>
         </div>
+        <div className="modal-search">
+          <input
+            type="text"
+            placeholder="Buscar deputado..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+          />
+        </div>
         <div className="modal-body">
-          {deputies.map((dep) => (
+          {filtered.map((dep) => (
             <div
               key={dep.id}
               className={`deputy-item ${dep.following ? "item-following" : ""}`}
