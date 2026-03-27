@@ -26,6 +26,29 @@ VOTE_TYPE_MAP = {
     "Art. 17": "AUSENTE",
 }
 
+ORGAN_DISPLAY = {
+    "PLEN": "Plenario da Camara",
+    "CCJC": "Comissao de Constituicao e Justica",
+    "CFT": "Comissao de Financas e Tributacao",
+    "CSSF": "Comissao de Seguridade Social",
+    "CE": "Comissao de Educacao",
+    "CMADS": "Comissao de Meio Ambiente",
+    "CSPCCO": "Comissao de Seguranca Publica",
+    "CCTCI": "Comissao de Ciencia e Tecnologia",
+    "CDU": "Comissao de Desenvolvimento Urbano",
+    "CVT": "Comissao de Viacao e Transportes",
+    "CTASP": "Comissao de Trabalho",
+    "CDC": "Comissao de Comunicacao",
+    "CPASF": "Comissao de Assistencia Social",
+    "CDEICS": "Comissao de Desenvolvimento Economico",
+    "CAPADR": "Comissao de Agricultura",
+    "CREDN": "Comissao de Relacoes Exteriores",
+    "CTUR": "Comissao de Turismo",
+    "CMULHER": "Comissao de Defesa dos Direitos da Mulher",
+    "CINDRA": "Comissao de Integracao Nacional",
+    "CSEC": "Comissao de Seguranca Publica",
+}
+
 CATEGORY_MAP = {
     "PLEN": "Plenario",
     "CCJC": "Justica",
@@ -101,6 +124,30 @@ def proposal_exists(external_id):
     return resp.status_code == 200, resp.json() if resp.status_code == 200 else None
 
 
+def update_proposal(proposal_id, session, details):
+    """Update an existing proposal with better title/summary from vote details."""
+    vote_date = session.get("data", "")[:10]
+    organ = session.get("siglaOrgao", "")
+    category = CATEGORY_MAP.get(organ, "Legislativo")
+
+    title, summary, author = extract_proposal_info(session, details)
+
+    if len(title) > 500:
+        title = title[:497] + "..."
+
+    payload = {
+        "title": title,
+        "summary": summary,
+        "author": author,
+        "category": category,
+        "voteDate": vote_date,
+        "externalId": str(session["id"]),
+    }
+    resp = requests.put(f"{BACKEND_BASE}/proposals/{proposal_id}", json=payload)
+    resp.raise_for_status()
+    return resp.json()
+
+
 def find_deputy_by_external_id(external_id):
     """Look up a deputy by their Camara API ID."""
     resp = requests.get(f"{BACKEND_BASE}/deputies/external/{external_id}")
@@ -109,22 +156,66 @@ def find_deputy_by_external_id(external_id):
     return None
 
 
+def extract_proposal_info(session, details):
+    """Extract meaningful title, summary, and author from the API response.
+
+    Priority for title/summary:
+      1. proposicoesAfetadas[0] — the actual bill (e.g. "PL 2599/2024 - Altera a Lei...")
+      2. ultimaApresentacaoProposicao — the rapporteur's report
+      3. Fallback to session-level fields (vote result text)
+    """
+    affected = details.get("proposicoesAfetadas", [])
+    last_presentation = details.get("ultimaApresentacaoProposicao") or {}
+
+    if affected:
+        prop = affected[0]
+        sigla = prop.get("siglaTipo", "")
+        numero = prop.get("numero", "")
+        ano = prop.get("ano", "")
+        ementa = prop.get("ementa", "")
+
+        # Title is just the bill identifier (e.g. "PLP 77/2026")
+        # Summary holds the full description to avoid duplication in the UI
+        bill_id = f"{sigla} {numero}/{ano}" if sigla and numero and ano else ""
+        title = bill_id or ementa or None
+        summary = ementa or None
+    else:
+        title = None
+        summary = None
+
+    # Fallback title/summary from session and details
+    if not title:
+        title = (details.get("objVotacao")
+                 or session.get("proposicaoTexto")
+                 or details.get("descricao")
+                 or "Votacao")
+    if not summary:
+        summary = (details.get("objVotacao")
+                   or details.get("descricao")
+                   or title)
+
+    # Author: use the organ name, keeping it short and clean
+    organ = session.get("siglaOrgao", "")
+    author = ORGAN_DISPLAY.get(organ, organ) or "Camara dos Deputados"
+
+    return title, summary, author
+
+
 def create_proposal(session, details):
     """Create a proposal from a Camara voting session."""
     vote_date = session.get("data", "")[:10]
-    title = session.get("proposicaoTexto") or details.get("descricao") or "Voting Session"
-    summary = details.get("objVotacao") or details.get("descricao") or title
     organ = session.get("siglaOrgao", "")
     category = CATEGORY_MAP.get(organ, "Legislativo")
 
-    # Truncate title if too long
+    title, summary, author = extract_proposal_info(session, details)
+
     if len(title) > 500:
         title = title[:497] + "..."
 
     payload = {
         "title": title,
         "summary": summary,
-        "author": organ or "Camara dos Deputados",
+        "author": author,
         "category": category,
         "voteDate": vote_date,
         "externalId": str(session["id"]),
@@ -166,6 +257,7 @@ def sync(days_back=7):
     print(f"\nFetched {len(sessions)} voting sessions\n")
 
     proposals_created = 0
+    proposals_updated = 0
     proposals_skipped = 0
     votes_created = 0
     votes_skipped = 0
@@ -173,22 +265,27 @@ def sync(days_back=7):
 
     for session in sessions:
         session_id = str(session["id"])
-        title = session.get("proposicaoTexto", "")[:80] or session_id
-        print(f"Processing: {title}")
+        print(f"Processing: {session_id}")
 
         # Check if proposal already exists
         exists, existing_proposal = proposal_exists(session_id)
+
+        # Always fetch details — needed for creation or update
+        time.sleep(REQUEST_DELAY)
+        details = fetch_vote_details(session_id)
+        if details is None:
+            print(f"  Skipped (404 from Camara API)")
+            continue
+
         if exists:
             proposal_id = existing_proposal["id"]
-            proposals_skipped += 1
-            print(f"  Proposal already exists (id={proposal_id}), checking votes...")
+            try:
+                update_proposal(proposal_id, session, details)
+                proposals_updated += 1
+                print(f"  ~ Updated proposal (id={proposal_id})")
+            except Exception as e:
+                print(f"  ! Error updating proposal: {e}")
         else:
-            # Fetch details and create proposal
-            time.sleep(REQUEST_DELAY)
-            details = fetch_vote_details(session_id)
-            if details is None:
-                print(f"  Skipped (404 from Camara API)")
-                continue
             try:
                 proposal = create_proposal(session, details)
                 proposal_id = proposal["id"]
@@ -222,7 +319,7 @@ def sync(days_back=7):
         time.sleep(REQUEST_DELAY)
 
     print(f"\n=== Summary ===")
-    print(f"Proposals: {proposals_created} created, {proposals_skipped} skipped")
+    print(f"Proposals: {proposals_created} created, {proposals_updated} updated, {proposals_skipped} skipped")
     print(f"Votes: {votes_created} created, {votes_skipped} skipped (duplicates)")
     if deputies_not_found:
         print(f"Deputies not found: {deputies_not_found} (run sync_deputies.py first)")

@@ -22,7 +22,7 @@ public class LegislativeProposal {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String summary;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String author;
 
     @Column(nullable = false, length = 100)
