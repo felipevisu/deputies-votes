@@ -2,20 +2,12 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Header from "./components/Header";
 import StoriesBar from "./components/StoriesBar";
 import Feed from "./components/Feed";
-import FilterBar from "./components/FilterBar";
 import FollowModal from "./components/FollowModal";
-import { fetchDeputies, fetchFeed } from "./api";
+import { fetchDeputies, fetchFeed, fetchProposalFeed } from "./api";
 import "./App.css";
 
 const STORAGE_KEY = "deolhoneles_followed";
 const FEED_PAGE_SIZE = 10;
-
-function normalize(str) {
-  return (str || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
 function loadFollowedIds() {
   try {
@@ -34,8 +26,8 @@ function App() {
   const [deputies, setDeputies] = useState([]);
   const [followedIds, setFollowedIds] = useState(loadFollowedIds);
   const [modalOpen, setModalOpen] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState("Todos");
   const [deputyFilter, setDeputyFilter] = useState(null);
+  const [feedMode, setFeedMode] = useState("deputies");
 
   const [feedItems, setFeedItems] = useState([]);
   const [feedPage, setFeedPage] = useState(0);
@@ -62,13 +54,16 @@ function App() {
     [deputies, followedSet],
   );
 
-  // Stable key for feed query — changes when deputy selection changes
+  // Stable key for feed query — changes when deputy selection or feed mode changes
   const feedKey = useMemo(() => {
-    if (deputyFilter) return `d:${deputyFilter}`;
-    return `f:${[...followedIds].sort((a, b) => a - b).join(",")}`;
-  }, [deputyFilter, followedIds]);
+    const prefix = feedMode === "proposals" ? "p" : "d";
+    if (deputyFilter) return `${prefix}:${deputyFilter}`;
+    return `${prefix}:f:${[...followedIds].sort((a, b) => a - b).join(",")}`;
+  }, [deputyFilter, followedIds, feedMode]);
 
-  // Fetch feed when deputy selection changes
+  const fetchFn = feedMode === "proposals" ? fetchProposalFeed : fetchFeed;
+
+  // Fetch feed when deputy selection or feed mode changes
   useEffect(() => {
     let cancelled = false;
     const ids = deputyFilter ? [deputyFilter] : [...followedIds];
@@ -80,7 +75,7 @@ function App() {
     if (ids.length === 0) return;
 
     setFeedLoading(true);
-    fetchFeed(ids, 0, FEED_PAGE_SIZE)
+    fetchFn(ids, 0, FEED_PAGE_SIZE)
       .then((data) => {
         if (cancelled) return;
         setFeedItems(data.content);
@@ -106,7 +101,7 @@ function App() {
     if (ids.length === 0) return;
 
     setFeedLoading(true);
-    fetchFeed(ids, feedPage, FEED_PAGE_SIZE)
+    fetchFn(ids, feedPage, FEED_PAGE_SIZE)
       .then((data) => {
         setFeedItems((prev) => [...prev, ...data.content]);
         setFeedHasMore(!data.last);
@@ -114,14 +109,7 @@ function App() {
       })
       .catch(console.error)
       .finally(() => setFeedLoading(false));
-  }, [feedLoading, feedHasMore, deputyFilter, followedIds, feedPage]);
-
-  // Client-side category filter
-  const filteredFeed = useMemo(() => {
-    if (categoryFilter === "Todos") return feedItems;
-    const target = normalize(categoryFilter);
-    return feedItems.filter((item) => normalize(item.category) === target);
-  }, [feedItems, categoryFilter]);
+  }, [feedLoading, feedHasMore, deputyFilter, followedIds, feedPage, fetchFn]);
 
   const followed = deputiesWithFollow.filter((d) => d.following);
 
@@ -147,14 +135,30 @@ function App() {
         }
         onAddClick={() => setModalOpen(true)}
       />
-      <FilterBar activeFilter={categoryFilter} onFilter={setCategoryFilter} />
+      <div className="feed-mode-bar">
+        <div className="feed-mode-toggle">
+          <button
+            className={`feed-mode-btn ${feedMode === "deputies" ? "active" : ""}`}
+            onClick={() => setFeedMode("deputies")}
+          >
+            Deputados
+          </button>
+          <button
+            className={`feed-mode-btn ${feedMode === "proposals" ? "active" : ""}`}
+            onClick={() => setFeedMode("proposals")}
+          >
+            Propostas
+          </button>
+        </div>
+      </div>
 
       <main className="main">
         <Feed
-          items={filteredFeed}
-          hasMore={feedHasMore && categoryFilter === "Todos"}
+          items={feedItems}
+          hasMore={feedHasMore}
           loading={feedLoading}
           onLoadMore={loadMoreFeed}
+          feedMode={feedMode}
         />
       </main>
 

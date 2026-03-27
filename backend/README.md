@@ -352,27 +352,35 @@ DELETE /proposals/{id}
 
 ### Feed
 
-Returns vote activity for deputies. Supports infinite scroll via pagination.
+Two feed modes are available. Both support infinite scroll via pagination and share the same request body.
 
-```
-POST /feed?page=0&size=10
-Content-Type: application/json
+**Request body:**
 
-{
-  "deputyIds": [1, 2, 4, 6, 8]
-}
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| `deputyIds` | Long[] | List of deputy IDs whose vote activity to return. Returns empty if null/empty. |
+
+**Pagination params (both endpoints):**
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `page` | int | No | Page number (default: `0`) |
 | `size` | int | No | Page size (default: `10`) |
 
-**Body:**
+**Vote values:** `SIM`, `NÃO`, `ABSTENÇÃO`, `AUSENTE`
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `deputyIds` | Long[] | List of deputy IDs whose vote activity to return. Returns empty if null/empty. |
+#### Deputies feed
+
+One item per deputy vote. If 5 deputies voted on the same proposal, you get 5 items.
+
+```
+POST /feed/deputies?page=0&size=10
+Content-Type: application/json
+
+{
+  "deputyIds": [1, 2, 4, 6, 8]
+}
+```
 
 **Response item:**
 
@@ -383,6 +391,7 @@ Content-Type: application/json
   "description": "Simplifica o sistema tributario brasileiro...",
   "deputieName": "Ana Souza",
   "deputieParty": "PSD - SP",
+  "deputiePhoto": "https://...",
   "vote": "SIM",
   "category": "Economia",
   "author": "Comissao Especial da Camara",
@@ -391,7 +400,47 @@ Content-Type: application/json
 }
 ```
 
-**Vote values:** `SIM`, `NÃO`, `ABSTENÇÃO`, `AUSENTE`
+#### Proposals feed
+
+One item per proposal, grouping all followed deputies' votes together. Avoids duplication when multiple followed deputies voted on the same proposal.
+
+```
+POST /feed/proposals?page=0&size=10
+Content-Type: application/json
+
+{
+  "deputyIds": [1, 2, 4, 6, 8]
+}
+```
+
+**Response item:**
+
+```json
+{
+  "proposalId": 1,
+  "name": "PL 1234/2026 - Reforma Tributaria",
+  "description": "Simplifica o sistema tributario brasileiro...",
+  "author": "Comissao Especial da Camara",
+  "voteDate": "2026-03-25",
+  "votes": [
+    {
+      "deputyId": 1,
+      "name": "Ana Souza",
+      "party": "PSD",
+      "state": "SP",
+      "photo": "https://...",
+      "vote": "SIM"
+    },
+    {
+      "deputyId": 2,
+      "name": "Carlos Mendes",
+      "party": "PT",
+      "state": "RJ",
+      "photo": null,
+      "vote": "NÃO"
+    }
+  ]
+}
 
 ---
 
@@ -417,9 +466,11 @@ backend/
     │   │   ├── AccountResponse.java
     │   │   ├── DeputyRequest.java
     │   │   ├── DeputyResponse.java
+    │   │   ├── DeputyVoteSummary.java
     │   │   ├── FeedItemResponse.java
     │   │   ├── FeedRequest.java
     │   │   ├── PageResponse.java
+    │   │   ├── ProposalFeedItemResponse.java
     │   │   ├── ProposalRequest.java
     │   │   └── ProposalResponse.java
     │   ├── entity/

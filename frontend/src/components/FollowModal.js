@@ -3,18 +3,49 @@ import Avatar from "./Avatar";
 
 function FollowModal({ deputies, onToggleFollow, onClose }) {
   const [search, setSearch] = useState("");
+  const [partyFilter, setPartyFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [followedOnly, setFollowedOnly] = useState(false);
+
   const followingCount = deputies.filter((d) => d.following).length;
 
+  const parties = useMemo(() => {
+    const set = new Set(deputies.map((d) => d.party).filter(Boolean));
+    return [...set].sort();
+  }, [deputies]);
+
+  const states = useMemo(() => {
+    const set = new Set(deputies.map((d) => d.state).filter(Boolean));
+    return [...set].sort();
+  }, [deputies]);
+
   const filtered = useMemo(() => {
-    if (!search.trim()) return deputies;
-    const term = search.toLowerCase();
-    return deputies.filter(
-      (d) =>
-        d.name.toLowerCase().includes(term) ||
-        d.party.toLowerCase().includes(term) ||
-        (d.state || "").toLowerCase().includes(term),
-    );
-  }, [deputies, search]);
+    let result = deputies;
+
+    if (followedOnly) {
+      result = result.filter((d) => d.following);
+    }
+
+    if (partyFilter) {
+      result = result.filter((d) => d.party === partyFilter);
+    }
+
+    if (stateFilter) {
+      result = result.filter((d) => d.state === stateFilter);
+    }
+
+    if (search.trim()) {
+      const term = search.toLowerCase();
+      result = result.filter(
+        (d) =>
+          d.name.toLowerCase().includes(term) ||
+          d.party.toLowerCase().includes(term) ||
+          (d.state || "").toLowerCase().includes(term),
+      );
+    }
+
+    return result;
+  }, [deputies, search, partyFilter, stateFilter, followedOnly]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -38,6 +69,38 @@ function FollowModal({ deputies, onToggleFollow, onClose }) {
             onChange={(e) => setSearch(e.target.value)}
             autoFocus
           />
+        </div>
+        <div className="modal-filters">
+          <select
+            className="modal-filter-select"
+            value={partyFilter}
+            onChange={(e) => setPartyFilter(e.target.value)}
+          >
+            <option value="">Partido</option>
+            {parties.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+          <select
+            className="modal-filter-select"
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+          >
+            <option value="">Estado</option>
+            {states.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <button
+            className={`modal-filter-toggle ${followedOnly ? "active" : ""}`}
+            onClick={() => setFollowedOnly((v) => !v)}
+          >
+            Seguindo
+          </button>
         </div>
         <div className="modal-body">
           {filtered.map((dep) => (

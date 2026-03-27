@@ -22,4 +22,16 @@ public interface DeputyVoteRepository extends JpaRepository<DeputyVote, Long> {
             WHERE dv.deputyId IN :deputyIds
             """)
     Page<DeputyVote> findFeedItemsByDeputyIds(@Param("deputyIds") List<Long> deputyIds, Pageable pageable);
+
+    @Query("""
+            SELECT dv FROM DeputyVote dv
+            JOIN FETCH dv.deputy d
+            JOIN FETCH dv.proposal p
+            WHERE dv.proposalId IN :proposalIds
+            AND dv.deputyId IN :deputyIds
+            ORDER BY d.name ASC
+            """)
+    List<DeputyVote> findVotesByProposalIdsAndDeputyIds(
+            @Param("proposalIds") List<Long> proposalIds,
+            @Param("deputyIds") List<Long> deputyIds);
 }

@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import FeedCard from "./FeedCard";
+import ProposalFeedCard from "./ProposalFeedCard";
 
-function Feed({ items, hasMore, loading, onLoadMore }) {
+function Feed({ items, hasMore, loading, onLoadMore, feedMode }) {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
 
@@ -37,10 +38,16 @@ function Feed({ items, hasMore, loading, onLoadMore }) {
     );
   }
 
+  const CardComponent = feedMode === "proposals" ? ProposalFeedCard : FeedCard;
+  const keyFn =
+    feedMode === "proposals"
+      ? (item, idx) => `p-${item.proposalId}-${idx}`
+      : (item, idx) => `${item.id}-${item.deputyId}-${idx}`;
+
   return (
     <div className="feed">
       {items.map((item, idx) => (
-        <FeedCard key={`${item.id}-${item.deputyId}-${idx}`} item={item} />
+        <CardComponent key={keyFn(item, idx)} item={item} />
       ))}
 
       {hasMore && (

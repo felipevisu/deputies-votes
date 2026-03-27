@@ -2,45 +2,6 @@ import React, { useState } from "react";
 import Avatar from "./Avatar";
 import VoteBadge from "./VoteBadge";
 
-function normalize(str) {
-  return (str || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-const CATEGORY_EMOJIS = {
-  economia: "💰",
-  tecnologia: "💻",
-  saude: "🏥",
-  seguranca: "🚔",
-  educacao: "📚",
-  "meio ambiente": "🌱",
-  comunicacao: "📡",
-  habitacao: "🏠",
-  transporte: "🚌",
-  trabalho: "💼",
-  plenario: "⚖️",
-  justica: "⚖️",
-  legislativo: "📜",
-};
-
-const CATEGORY_DISPLAY = {
-  economia: "Economia",
-  tecnologia: "Tecnologia",
-  saude: "Saúde",
-  seguranca: "Segurança",
-  educacao: "Educação",
-  "meio ambiente": "Meio Ambiente",
-  comunicacao: "Comunicação",
-  habitacao: "Habitação",
-  transporte: "Transporte",
-  trabalho: "Trabalho",
-  plenario: "Plenário",
-  justica: "Justiça",
-  legislativo: "Legislativo",
-};
-
 const VOTE_STYLES = {
   SIM: { emoji: "👍", color: "#10b981" },
   NÃO: { emoji: "👎", color: "#ef4444" },
@@ -70,9 +31,6 @@ function FeedCard({ item }) {
   const title = item.name;
   const summary = item.description;
   const author = item.author;
-  const categoryKey = normalize(item.category);
-  const category = CATEGORY_DISPLAY[categoryKey] || item.category;
-  const categoryEmoji = CATEGORY_EMOJIS[categoryKey] || "📋";
   const voteDate = item.voteDate;
   const vote = item.vote || "AUSENTE";
   const style = VOTE_STYLES[vote] || VOTE_STYLES["AUSENTE"];
@@ -105,9 +63,6 @@ function FeedCard({ item }) {
           <span className="vote-highlight-emoji">{style.emoji}</span>
           <div className="vote-highlight-info">
             <VoteBadge vote={vote} />
-            <span className="feed-card-category">
-              {categoryEmoji} {category}
-            </span>
           </div>
         </div>
 
