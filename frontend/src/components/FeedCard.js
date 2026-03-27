@@ -43,8 +43,8 @@ const CATEGORY_DISPLAY = {
 
 const VOTE_STYLES = {
   SIM: { emoji: "👍", color: "#10b981" },
-  "NÃO": { emoji: "👎", color: "#ef4444" },
-  "ABSTENÇÃO": { emoji: "🤷", color: "#f59e0b" },
+  NÃO: { emoji: "👎", color: "#ef4444" },
+  ABSTENÇÃO: { emoji: "🤷", color: "#f59e0b" },
   AUSENTE: { emoji: "👻", color: "#9ca3af" },
 };
 
@@ -78,12 +78,13 @@ function FeedCard({ item }) {
   const style = VOTE_STYLES[vote] || VOTE_STYLES["AUSENTE"];
   const deputyName = item.deputieName;
   const deputyParty = item.deputieParty;
+  const deputyPhoto = item.deputiePhoto || item.avatar || item.photo;
 
   return (
     <article className="feed-card" onClick={() => setExpanded(!expanded)}>
       <div className="feed-card-header">
         <div className="feed-card-deputy">
-          <Avatar name={deputyName || "??"} size={44} />
+          <Avatar name={deputyName || "??"} size={44} photo={deputyPhoto} />
           <div className="feed-card-deputy-info">
             <span className="deputy-name">{deputyName}</span>
             <span className="deputy-detail">

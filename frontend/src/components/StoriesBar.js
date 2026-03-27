@@ -20,7 +20,11 @@ function StoriesBar({ deputies, activeDeputyId, onSelectDeputy, onAddClick }) {
               className={`story-item ${activeDeputyId === dep.id ? "story-active" : ""}`}
               onClick={() => onSelectDeputy(dep.id)}
             >
-              <Avatar name={displayName} size={56} />
+              <Avatar
+                name={displayName}
+                size={56}
+                photo={dep.avatar || dep.photo}
+              />
               <span className="story-name">{displayName.split(" ")[0]}</span>
             </button>
           );

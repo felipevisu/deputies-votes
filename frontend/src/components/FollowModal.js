@@ -47,7 +47,11 @@ function FollowModal({ deputies, onToggleFollow, onClose }) {
               onClick={() => onToggleFollow(dep.id)}
             >
               <div className="deputy-item-info">
-                <Avatar name={dep.name} size={48} />
+                <Avatar
+                  name={dep.name}
+                  size={48}
+                  photo={dep.avatar || dep.photo}
+                />
                 <div className="deputy-item-text">
                   <span className="deputy-item-name">{dep.name}</span>
                   <span className="deputy-item-party">

@@ -13,7 +13,7 @@ const GRADIENTS = [
   "linear-gradient(135deg, #96fbc4, #f9f586)",
 ];
 
-function Avatar({ name, size = 40 }) {
+function Avatar({ name, size = 40, photo }) {
   // Defensive: ensure name is a non-empty string
   const safeName =
     typeof name === "string" && name.trim().length > 0 ? name : "??";
@@ -23,11 +23,24 @@ function Avatar({ name, size = 40 }) {
     .slice(0, 2)
     .map((p) => p[0])
     .join("");
-
   const colorIndex =
     safeName.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) %
     GRADIENTS.length;
-
+  if (photo) {
+    return (
+      <img
+        className="avatar"
+        src={photo}
+        alt={name}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          objectFit: "cover",
+        }}
+      />
+    );
+  }
   return (
     <div
       className="avatar"
