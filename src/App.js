@@ -13,28 +13,22 @@ function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("Todos");
   const [deputyFilter, setDeputyFilter] = useState(null);
-
   const votes = useMemo(() => generateVotes(deputies), [deputies]);
 
   const filteredVotes = useMemo(() => {
     const followedIds = new Set(
-      deputies.filter((d) => d.following).map((d) => d.id)
+      deputies.filter((d) => d.following).map((d) => d.id),
     );
-
     let result = votes.filter((v) => followedIds.has(v.deputyId));
-
     if (deputyFilter) {
       result = result.filter((v) => v.deputyId === deputyFilter);
     }
-
     if (categoryFilter !== "Todos") {
       result = result.filter((v) => v.project.category === categoryFilter);
     }
-
     result.sort(
-      (a, b) => new Date(b.project.voteDate) - new Date(a.project.voteDate)
+      (a, b) => new Date(b.project.voteDate) - new Date(a.project.voteDate),
     );
-
     return result;
   }, [votes, deputies, categoryFilter, deputyFilter]);
 
@@ -42,7 +36,7 @@ function App() {
 
   function toggleFollow(id) {
     setDeputies((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, following: !d.following } : d))
+      prev.map((d) => (d.id === id ? { ...d, following: !d.following } : d)),
     );
   }
 

@@ -18,7 +18,6 @@ function FollowModal({ deputies, onToggleFollow, onClose }) {
             ✕
           </button>
         </div>
-
         <div className="modal-body">
           {deputies.map((dep) => (
             <div

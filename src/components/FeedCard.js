@@ -5,20 +5,20 @@ import VoteBadge from "./VoteBadge";
 const CATEGORY_EMOJIS = {
   Economia: "💰",
   Tecnologia: "💻",
-  "Saúde": "🏥",
-  "Segurança": "🚔",
-  "Educação": "📚",
+  Saúde: "🏥",
+  Segurança: "🚔",
+  Educação: "📚",
   "Meio Ambiente": "🌱",
-  "Comunicação": "📡",
-  "Habitação": "🏠",
+  Comunicação: "📡",
+  Habitação: "🏠",
   Transporte: "🚌",
   Trabalho: "💼",
 };
 
 const VOTE_STYLES = {
   SIM: { emoji: "👍", color: "#10b981" },
-  "NÃO": { emoji: "👎", color: "#ef4444" },
-  "ABSTENÇÃO": { emoji: "🤷", color: "#f59e0b" },
+  NÃO: { emoji: "👎", color: "#ef4444" },
+  ABSTENÇÃO: { emoji: "🤷", color: "#f59e0b" },
   AUSENTE: { emoji: "👻", color: "#9ca3af" },
 };
 
@@ -39,19 +39,32 @@ function formatDate(dateStr) {
 
 function FeedCard({ voteData, deputy }) {
   const [expanded, setExpanded] = useState(false);
-  const { project, vote } = voteData;
-
+  // Support both mock and API data
+  const project = voteData.project ||
+    voteData.project || {
+      title: voteData.proposicaoTexto || voteData.descricao || "Votação",
+      summary: voteData.objVotacao || voteData.descricao || "",
+      author: "",
+      category: voteData.siglaOrgao || "",
+      voteDate: voteData.data || voteData.dataHoraRegistro,
+    };
+  const vote = voteData.vote || voteData.tipoVoto || "AUSENTE";
   const style = VOTE_STYLES[vote] || VOTE_STYLES["AUSENTE"];
 
   return (
     <article className="feed-card" onClick={() => setExpanded(!expanded)}>
       <div className="feed-card-header">
         <div className="feed-card-deputy">
-          <Avatar name={deputy.name} size={44} />
+          <Avatar
+            name={(deputy && (deputy.nome || deputy.name)) || "??"}
+            size={44}
+          />
           <div className="feed-card-deputy-info">
-            <span className="deputy-name">{deputy.name}</span>
+            <span className="deputy-name">{deputy.nome || deputy.name}</span>
             <span className="deputy-detail">
-              {deputy.party} · {deputy.state} · {formatDate(project.voteDate)}
+              {deputy.siglaPartido || deputy.party || ""} ·{" "}
+              {deputy.siglaUf || deputy.state || ""} ·{" "}
+              {formatDate(project.voteDate)}
             </span>
           </div>
         </div>
@@ -60,7 +73,10 @@ function FeedCard({ voteData, deputy }) {
       <div className="feed-card-body">
         <div
           className="feed-card-vote-highlight"
-          style={{ backgroundColor: `${style.color}12`, borderColor: `${style.color}30` }}
+          style={{
+            backgroundColor: `${style.color}12`,
+            borderColor: `${style.color}30`,
+          }}
         >
           <span className="vote-highlight-emoji">{style.emoji}</span>
           <div className="vote-highlight-info">
@@ -90,9 +106,7 @@ function FeedCard({ voteData, deputy }) {
         )}
 
         <div className="feed-card-footer">
-          <span className="feed-card-author">
-            ✍️ {project.author}
-          </span>
+          <span className="feed-card-author">✍️ {project.author}</span>
         </div>
       </div>
     </article>

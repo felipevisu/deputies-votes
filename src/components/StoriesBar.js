@@ -12,16 +12,19 @@ function StoriesBar({ deputies, activeDeputyId, onSelectDeputy, onAddClick }) {
           <span className="story-name">Adicionar</span>
         </button>
 
-        {deputies.map((dep) => (
-          <button
-            key={dep.id}
-            className={`story-item ${activeDeputyId === dep.id ? "story-active" : ""}`}
-            onClick={() => onSelectDeputy(dep.id)}
-          >
-            <Avatar name={dep.name} size={56} />
-            <span className="story-name">{dep.name.split(" ")[0]}</span>
-          </button>
-        ))}
+        {deputies.map((dep) => {
+          const displayName = dep.nome || dep.name || "??";
+          return (
+            <button
+              key={dep.id}
+              className={`story-item ${activeDeputyId === dep.id ? "story-active" : ""}`}
+              onClick={() => onSelectDeputy(dep.id)}
+            >
+              <Avatar name={displayName} size={56} />
+              <span className="story-name">{displayName.split(" ")[0]}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

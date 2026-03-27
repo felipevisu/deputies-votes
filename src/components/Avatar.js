@@ -14,7 +14,10 @@ const GRADIENTS = [
 ];
 
 function Avatar({ name, size = 40 }) {
-  const initials = name
+  // Defensive: ensure name is a non-empty string
+  const safeName =
+    typeof name === "string" && name.trim().length > 0 ? name : "??";
+  const initials = safeName
     .split(" ")
     .filter((p) => p.length > 2)
     .slice(0, 2)
@@ -22,7 +25,8 @@ function Avatar({ name, size = 40 }) {
     .join("");
 
   const colorIndex =
-    name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % GRADIENTS.length;
+    safeName.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+    GRADIENTS.length;
 
   return (
     <div

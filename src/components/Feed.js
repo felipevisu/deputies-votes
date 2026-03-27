@@ -9,6 +9,7 @@ function Feed({ votes, deputies }) {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
 
+  // Deputies from API: id is 'id', name is 'nome', party is 'siglaPartido', state is 'siglaUf'
   const deputyMap = {};
   for (const dep of deputies) {
     deputyMap[dep.id] = dep;
@@ -31,7 +32,7 @@ function Feed({ votes, deputies }) {
           loadMore();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observerRef.current = observer;
@@ -64,13 +65,19 @@ function Feed({ votes, deputies }) {
 
   return (
     <div className="feed">
-      {visibleVotes.map((voteData) => (
-        <FeedCard
-          key={voteData.id}
-          voteData={voteData}
-          deputy={deputyMap[voteData.deputyId]}
-        />
-      ))}
+      {visibleVotes.map((voteData, idx) => {
+        // voteData.deputado_ (from API) or voteData.deputyId (old mock)
+        const deputyId = voteData.deputado_
+          ? voteData.deputado_.id
+          : voteData.deputyId;
+        return (
+          <FeedCard
+            key={voteData.id || idx}
+            voteData={voteData}
+            deputy={deputyMap[deputyId] || voteData.deputado_}
+          />
+        );
+      })}
 
       {visibleItems < votes.length && (
         <div ref={sentinelRef} className="feed-sentinel">
