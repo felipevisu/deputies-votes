@@ -9,7 +9,7 @@ set -euo pipefail
 #   2. Updates:     ssh root@<IP> 'cd /opt/deolhoneles && git pull && docker compose -f docker-compose.prod.yml up -d --build'
 
 APP_DIR="/opt/deolhoneles"
-REPO="https://github.com/YOUR_USER/de-olho-neles.git"  # <-- update this
+REPO="https://github.com/felipevisu/deputies-votes.git"
 
 echo "==> Installing Docker..."
 if ! command -v docker &>/dev/null; then
