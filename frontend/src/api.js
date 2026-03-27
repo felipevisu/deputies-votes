@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080";
+const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 export async function fetchDeputies(page = 0, size = 100) {
   const res = await fetch(`${API_BASE}/deputies?page=${page}&size=${size}`);

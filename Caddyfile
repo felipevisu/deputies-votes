@@ -1,0 +1,25 @@
+:80 {
+	handle /deputies* {
+		reverse_proxy backend:8080
+	}
+
+	handle /feed* {
+		reverse_proxy backend:8080
+	}
+
+	handle /accounts* {
+		reverse_proxy backend:8080
+	}
+
+	handle /proposals* {
+		reverse_proxy backend:8080
+	}
+
+	handle /votes* {
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		reverse_proxy frontend:80
+	}
+}

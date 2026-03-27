@@ -1,36 +1,50 @@
 services:
   postgres:
     image: postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: deolhoneles
       POSTGRES_USER: deolhoneles
-      POSTGRES_PASSWORD: deolhoneles
-    ports:
-      - "5433:5432"
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-deolhoneles}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U deolhoneles"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
 
   backend:
     build: ./backend
-    ports:
-      - "8080:8080"
+    restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-deolhoneles}
     depends_on:
       postgres:
         condition: service_healthy
 
   frontend:
     build: ./frontend
-    ports:
-      - "3000:80"
+    restart: unless-stopped
     depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
       - backend
 
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:
