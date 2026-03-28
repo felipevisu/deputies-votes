@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import FeedCard from "./FeedCard";
-import ProposalFeedCard from "./ProposalFeedCard";
+import ActivityFeedCard from "./ActivityFeedCard";
 
 function Feed({ items, hasMore, loading, onLoadMore, feedMode }) {
   const observerRef = useRef(null);
@@ -38,10 +38,10 @@ function Feed({ items, hasMore, loading, onLoadMore, feedMode }) {
     );
   }
 
-  const CardComponent = feedMode === "proposals" ? ProposalFeedCard : FeedCard;
+  const CardComponent = feedMode === "activities" ? ActivityFeedCard : FeedCard;
   const keyFn =
-    feedMode === "proposals"
-      ? (item, idx) => `p-${item.proposalId}-${idx}`
+    feedMode === "activities"
+      ? (item, idx) => `a-${item.activityId}-${idx}`
       : (item, idx) => `${item.id}-${item.deputyId}-${idx}`;
 
   return (

@@ -121,28 +121,28 @@
       "url": "http://localhost:8080/deputies/{{deputyId}}"
     },
     {
-      "name": "List Proposals",
+      "name": "List Activities",
       "method": "GET",
-      "url": "http://localhost:8080/proposals",
+      "url": "http://localhost:8080/activities",
       "params": [
         { "name": "page", "value": "0", "enabled": true },
         { "name": "size", "value": "20", "enabled": true }
       ]
     },
     {
-      "name": "Get Proposal by ID",
+      "name": "Get Activity by ID",
       "method": "GET",
-      "url": "http://localhost:8080/proposals/{{proposalId}}"
+      "url": "http://localhost:8080/activities/{{activityId}}"
     },
     {
-      "name": "Get Proposal by External ID",
+      "name": "Get Activity by External ID",
       "method": "GET",
-      "url": "http://localhost:8080/proposals/external/{{externalId}}"
+      "url": "http://localhost:8080/activities/external/{{externalId}}"
     },
     {
-      "name": "Create Proposal",
+      "name": "Create Activity",
       "method": "POST",
-      "url": "http://localhost:8080/proposals",
+      "url": "http://localhost:8080/activities",
       "body": {
         "type": "json",
         "content": {
@@ -156,9 +156,9 @@
       }
     },
     {
-      "name": "Update Proposal",
+      "name": "Update Activity",
       "method": "PUT",
-      "url": "http://localhost:8080/proposals/{{proposalId}}",
+      "url": "http://localhost:8080/activities/{{activityId}}",
       "body": {
         "type": "json",
         "content": {
@@ -172,9 +172,9 @@
       }
     },
     {
-      "name": "Delete Proposal",
+      "name": "Delete Activity",
       "method": "DELETE",
-      "url": "http://localhost:8080/proposals/{{proposalId}}"
+      "url": "http://localhost:8080/activities/{{activityId}}"
     },
     {
       "name": "Get Feed",
@@ -199,7 +199,7 @@
         "type": "json",
         "content": {
           "deputyId": 1,
-          "proposalId": 1,
+          "activityId": 1,
           "vote": "SIM"
         }
       }

@@ -25,11 +25,11 @@ def main():
     print("-" * 60)
     print()
 
-    proposals_created, votes_created = sync_votes(days_back=days)
+    activities_created, votes_created = sync_votes(days_back=days)
 
     print()
     print("=" * 60)
-    print(f"  Total: {deputies_created} deputies, {proposals_created} proposals, {votes_created} votes")
+    print(f"  Total: {deputies_created} deputies, {activities_created} activities, {votes_created} votes")
     print("=" * 60)
 
 

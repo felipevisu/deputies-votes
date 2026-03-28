@@ -23,8 +23,8 @@ public class DeputyVote {
     @Column(name = "deputy_id", nullable = false)
     private Long deputyId;
 
-    @Column(name = "proposal_id", nullable = false)
-    private Long proposalId;
+    @Column(name = "activity_id", nullable = false)
+    private Long activityId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -35,8 +35,8 @@ public class DeputyVote {
     private Deputy deputy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proposal_id", insertable = false, updatable = false)
-    private LegislativeProposal proposal;
+    @JoinColumn(name = "activity_id", insertable = false, updatable = false)
+    private LegislativeActivity activity;
 
     public Long getId() {
         return id;
@@ -54,12 +54,12 @@ public class DeputyVote {
         this.deputyId = deputyId;
     }
 
-    public Long getProposalId() {
-        return proposalId;
+    public Long getActivityId() {
+        return activityId;
     }
 
-    public void setProposalId(Long proposalId) {
-        this.proposalId = proposalId;
+    public void setActivityId(Long activityId) {
+        this.activityId = activityId;
     }
 
     public VoteType getVote() {
@@ -78,11 +78,11 @@ public class DeputyVote {
         this.deputy = deputy;
     }
 
-    public LegislativeProposal getProposal() {
-        return proposal;
+    public LegislativeActivity getActivity() {
+        return activity;
     }
 
-    public void setProposal(LegislativeProposal proposal) {
-        this.proposal = proposal;
+    public void setActivity(LegislativeActivity activity) {
+        this.activity = activity;
     }
 }

@@ -13,9 +13,9 @@ public interface DeputyVoteRepository extends JpaRepository<DeputyVote, Long> {
     @Query(value = """
             SELECT dv FROM DeputyVote dv
             JOIN FETCH dv.deputy d
-            JOIN FETCH dv.proposal p
+            JOIN FETCH dv.activity a
             WHERE d.id IN :deputyIds
-            ORDER BY p.voteDate DESC, dv.id ASC
+            ORDER BY a.voteDate DESC, dv.id ASC
             """,
             countQuery = """
             SELECT COUNT(dv) FROM DeputyVote dv
@@ -26,12 +26,12 @@ public interface DeputyVoteRepository extends JpaRepository<DeputyVote, Long> {
     @Query("""
             SELECT dv FROM DeputyVote dv
             JOIN FETCH dv.deputy d
-            JOIN FETCH dv.proposal p
-            WHERE dv.proposalId IN :proposalIds
+            JOIN FETCH dv.activity a
+            WHERE dv.activityId IN :activityIds
             AND dv.deputyId IN :deputyIds
             ORDER BY d.name ASC
             """)
-    List<DeputyVote> findVotesByProposalIdsAndDeputyIds(
-            @Param("proposalIds") List<Long> proposalIds,
+    List<DeputyVote> findVotesByActivityIdsAndDeputyIds(
+            @Param("activityIds") List<Long> activityIds,
             @Param("deputyIds") List<Long> deputyIds);
 }

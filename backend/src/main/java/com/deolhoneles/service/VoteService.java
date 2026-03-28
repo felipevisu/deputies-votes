@@ -21,13 +21,13 @@ public class VoteService {
     public VoteResponse createVote(VoteRequest request) {
         DeputyVote vote = new DeputyVote();
         vote.setDeputyId(request.deputyId());
-        vote.setProposalId(request.proposalId());
+        vote.setActivityId(request.activityId());
         vote.setVote(request.vote());
         try {
             deputyVoteRepository.save(vote);
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("Vote already exists for deputy " + request.deputyId()
-                    + " on proposal " + request.proposalId());
+                    + " on activity " + request.activityId());
         }
         return VoteResponse.from(vote);
     }

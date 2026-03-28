@@ -3,7 +3,7 @@ import Header from "./components/Header";
 import StoriesBar from "./components/StoriesBar";
 import Feed from "./components/Feed";
 import FollowModal from "./components/FollowModal";
-import { fetchDeputies, fetchFeed, fetchProposalFeed } from "./api";
+import { fetchDeputies, fetchFeed, fetchActivityFeed } from "./api";
 import "./App.css";
 
 const STORAGE_KEY = "deolhoneles_followed";
@@ -56,12 +56,12 @@ function App() {
 
   // Stable key for feed query — changes when deputy selection or feed mode changes
   const feedKey = useMemo(() => {
-    const prefix = feedMode === "proposals" ? "p" : "d";
+    const prefix = feedMode === "activities" ? "a" : "d";
     if (deputyFilter) return `${prefix}:${deputyFilter}`;
     return `${prefix}:f:${[...followedIds].sort((a, b) => a - b).join(",")}`;
   }, [deputyFilter, followedIds, feedMode]);
 
-  const fetchFn = feedMode === "proposals" ? fetchProposalFeed : fetchFeed;
+  const fetchFn = feedMode === "activities" ? fetchActivityFeed : fetchFeed;
 
   // Fetch feed when deputy selection or feed mode changes
   useEffect(() => {
@@ -144,10 +144,10 @@ function App() {
             Deputados
           </button>
           <button
-            className={`feed-mode-btn ${feedMode === "proposals" ? "active" : ""}`}
-            onClick={() => setFeedMode("proposals")}
+            className={`feed-mode-btn ${feedMode === "activities" ? "active" : ""}`}
+            onClick={() => setFeedMode("activities")}
           >
-            Propostas
+            Atividades
           </button>
         </div>
       </div>

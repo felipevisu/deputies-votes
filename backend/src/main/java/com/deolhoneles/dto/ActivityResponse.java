@@ -1,9 +1,9 @@
 package com.deolhoneles.dto;
 
-import com.deolhoneles.entity.LegislativeProposal;
+import com.deolhoneles.entity.LegislativeActivity;
 import java.time.LocalDate;
 
-public record ProposalResponse(
+public record ActivityResponse(
         Long id,
         String title,
         String summary,
@@ -13,8 +13,8 @@ public record ProposalResponse(
         String externalId
 ) {
 
-    public static ProposalResponse from(LegislativeProposal entity) {
-        return new ProposalResponse(
+    public static ActivityResponse from(LegislativeActivity entity) {
+        return new ActivityResponse(
                 entity.getId(),
                 entity.getTitle(),
                 entity.getSummary(),

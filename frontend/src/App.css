@@ -399,23 +399,23 @@ body {
   font-weight: 600;
 }
 
-/* ============ Proposal Feed Card ============ */
+/* ============ Activity Feed Card ============ */
 
-.proposal-card-header {
+.activity-card-header {
   margin-bottom: 10px;
 }
 
-.proposal-card-date {
+.activity-card-date {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-light);
 }
 
-.proposal-votes-section {
+.activity-votes-section {
   margin-top: 14px;
 }
 
-.proposal-votes-label {
+.activity-votes-label {
   font-size: 12px;
   font-weight: 800;
   color: var(--text-secondary);
@@ -423,14 +423,14 @@ body {
   letter-spacing: 0.5px;
 }
 
-.proposal-votes-list {
+.activity-votes-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-top: 8px;
 }
 
-.proposal-vote-row {
+.activity-vote-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -439,20 +439,20 @@ body {
   border: 1px solid;
 }
 
-.proposal-vote-deputy {
+.activity-vote-deputy {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.proposal-vote-deputy-info {
+.activity-vote-deputy-info {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.proposal-vote-deputy-name {
+.activity-vote-deputy-name {
   font-weight: 700;
   font-size: 13px;
   color: var(--text-primary);
@@ -461,20 +461,20 @@ body {
   text-overflow: ellipsis;
 }
 
-.proposal-vote-deputy-party {
+.activity-vote-deputy-party {
   font-size: 11px;
   color: var(--text-light);
   font-weight: 600;
 }
 
-.proposal-vote-result {
+.activity-vote-result {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.proposal-vote-emoji {
+.activity-vote-emoji {
   font-size: 18px;
   line-height: 1;
 }

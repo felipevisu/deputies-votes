@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "legislative_proposal")
-public class LegislativeProposal {
+@Table(name = "legislative_activity")
+public class LegislativeActivity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

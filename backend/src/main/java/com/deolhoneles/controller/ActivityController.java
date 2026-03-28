@@ -1,9 +1,9 @@
 package com.deolhoneles.controller;
 
+import com.deolhoneles.dto.ActivityRequest;
+import com.deolhoneles.dto.ActivityResponse;
 import com.deolhoneles.dto.PageResponse;
-import com.deolhoneles.dto.ProposalRequest;
-import com.deolhoneles.dto.ProposalResponse;
-import com.deolhoneles.service.ProposalService;
+import com.deolhoneles.service.ActivityService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,48 +19,48 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/proposals")
-public class ProposalController {
+@RequestMapping("/activities")
+public class ActivityController {
 
-    private final ProposalService proposalService;
+    private final ActivityService activityService;
 
-    public ProposalController(ProposalService proposalService) {
-        this.proposalService = proposalService;
+    public ActivityController(ActivityService activityService) {
+        this.activityService = activityService;
     }
 
     @GetMapping
-    public PageResponse<ProposalResponse> listProposals(
+    public PageResponse<ActivityResponse> listActivities(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return proposalService.listProposals(page, size);
+        return activityService.listActivities(page, size);
     }
 
     @GetMapping("/{id}")
-    public ProposalResponse getProposal(@PathVariable Long id) {
-        return proposalService.getProposal(id);
+    public ActivityResponse getActivity(@PathVariable Long id) {
+        return activityService.getActivity(id);
     }
 
     @GetMapping("/external/{externalId}")
-    public ResponseEntity<ProposalResponse> findByExternalId(@PathVariable String externalId) {
-        return proposalService.findByExternalId(externalId)
+    public ResponseEntity<ActivityResponse> findByExternalId(@PathVariable String externalId) {
+        return activityService.findByExternalId(externalId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProposalResponse createProposal(@Valid @RequestBody ProposalRequest request) {
-        return proposalService.createProposal(request);
+    public ActivityResponse createActivity(@Valid @RequestBody ActivityRequest request) {
+        return activityService.createActivity(request);
     }
 
     @PutMapping("/{id}")
-    public ProposalResponse updateProposal(@PathVariable Long id, @Valid @RequestBody ProposalRequest request) {
-        return proposalService.updateProposal(id, request);
+    public ActivityResponse updateActivity(@PathVariable Long id, @Valid @RequestBody ActivityRequest request) {
+        return activityService.updateActivity(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProposal(@PathVariable Long id) {
-        proposalService.deleteProposal(id);
+    public void deleteActivity(@PathVariable Long id) {
+        activityService.deleteActivity(id);
     }
 }

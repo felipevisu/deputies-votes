@@ -6,7 +6,7 @@ import com.deolhoneles.entity.VoteType;
 public record VoteResponse(
         Long id,
         Long deputyId,
-        Long proposalId,
+        Long activityId,
         VoteType vote
 ) {
 
@@ -14,7 +14,7 @@ public record VoteResponse(
         return new VoteResponse(
                 entity.getId(),
                 entity.getDeputyId(),
-                entity.getProposalId(),
+                entity.getActivityId(),
                 entity.getVote()
         );
     }

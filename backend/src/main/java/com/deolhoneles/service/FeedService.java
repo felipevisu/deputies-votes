@@ -1,14 +1,14 @@
 package com.deolhoneles.service;
 
+import com.deolhoneles.dto.ActivityFeedItemResponse;
 import com.deolhoneles.dto.DeputyVoteSummary;
 import com.deolhoneles.dto.FeedItemResponse;
 import com.deolhoneles.dto.FeedRequest;
 import com.deolhoneles.dto.PageResponse;
-import com.deolhoneles.dto.ProposalFeedItemResponse;
 import com.deolhoneles.entity.DeputyVote;
-import com.deolhoneles.entity.LegislativeProposal;
+import com.deolhoneles.entity.LegislativeActivity;
 import com.deolhoneles.repository.DeputyVoteRepository;
-import com.deolhoneles.repository.LegislativeProposalRepository;
+import com.deolhoneles.repository.LegislativeActivityRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedService {
 
     private final DeputyVoteRepository deputyVoteRepository;
-    private final LegislativeProposalRepository proposalRepository;
+    private final LegislativeActivityRepository activityRepository;
 
     public FeedService(DeputyVoteRepository deputyVoteRepository,
-                       LegislativeProposalRepository proposalRepository) {
+                       LegislativeActivityRepository activityRepository) {
         this.deputyVoteRepository = deputyVoteRepository;
-        this.proposalRepository = proposalRepository;
+        this.activityRepository = activityRepository;
     }
 
     @Transactional(readOnly = true)
@@ -45,39 +45,39 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ProposalFeedItemResponse> getProposalFeed(FeedRequest request, int page, int size) {
+    public PageResponse<ActivityFeedItemResponse> getActivityFeed(FeedRequest request, int page, int size) {
         if (request.deputyIds() == null || request.deputyIds().isEmpty()) {
             return new PageResponse<>(Collections.emptyList(), page, size, 0, 0, true);
         }
 
         PageRequest pageable = PageRequest.of(page, size);
-        Page<LegislativeProposal> proposalPage =
-                proposalRepository.findProposalsVotedByDeputyIds(request.deputyIds(), pageable);
+        Page<LegislativeActivity> activityPage =
+                activityRepository.findActivitiesVotedByDeputyIds(request.deputyIds(), pageable);
 
-        List<LegislativeProposal> proposals = proposalPage.getContent();
-        if (proposals.isEmpty()) {
-            return PageResponse.from(proposalPage, Collections.emptyList());
+        List<LegislativeActivity> activities = activityPage.getContent();
+        if (activities.isEmpty()) {
+            return PageResponse.from(activityPage, Collections.emptyList());
         }
 
-        List<Long> proposalIds = proposals.stream().map(LegislativeProposal::getId).toList();
+        List<Long> activityIds = activities.stream().map(LegislativeActivity::getId).toList();
         List<DeputyVote> votes = deputyVoteRepository
-                .findVotesByProposalIdsAndDeputyIds(proposalIds, request.deputyIds());
+                .findVotesByActivityIdsAndDeputyIds(activityIds, request.deputyIds());
 
-        Map<Long, List<DeputyVoteSummary>> votesByProposal = votes.stream()
+        Map<Long, List<DeputyVoteSummary>> votesByActivity = votes.stream()
                 .collect(Collectors.groupingBy(
-                        DeputyVote::getProposalId,
+                        DeputyVote::getActivityId,
                         Collectors.mapping(DeputyVoteSummary::from, Collectors.toList())));
 
-        List<ProposalFeedItemResponse> content = proposals.stream()
-                .map(p -> new ProposalFeedItemResponse(
-                        p.getId(),
-                        p.getTitle(),
-                        p.getSummary(),
-                        p.getAuthor(),
-                        p.getVoteDate(),
-                        votesByProposal.getOrDefault(p.getId(), Collections.emptyList())))
+        List<ActivityFeedItemResponse> content = activities.stream()
+                .map(a -> new ActivityFeedItemResponse(
+                        a.getId(),
+                        a.getTitle(),
+                        a.getSummary(),
+                        a.getAuthor(),
+                        a.getVoteDate(),
+                        votesByActivity.getOrDefault(a.getId(), Collections.emptyList())))
                 .toList();
 
-        return PageResponse.from(proposalPage, content);
+        return PageResponse.from(activityPage, content);
     }
 }

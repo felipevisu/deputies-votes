@@ -16,12 +16,12 @@ export async function fetchFeed(deputyIds, page = 0, size = 10) {
   return res.json();
 }
 
-export async function fetchProposalFeed(deputyIds, page = 0, size = 10) {
-  const res = await fetch(`${API_BASE}/feed/proposals?page=${page}&size=${size}`, {
+export async function fetchActivityFeed(deputyIds, page = 0, size = 10) {
+  const res = await fetch(`${API_BASE}/feed/activities?page=${page}&size=${size}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ deputyIds }),
   });
-  if (!res.ok) throw new Error("Failed to fetch proposal feed");
+  if (!res.ok) throw new Error("Failed to fetch activity feed");
   return res.json();
 }

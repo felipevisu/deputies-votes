@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record VoteRequest(
         @NotNull Long deputyId,
-        @NotNull Long proposalId,
+        @NotNull Long activityId,
         @NotNull VoteType vote
 ) {
 }

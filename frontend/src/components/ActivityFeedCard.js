@@ -25,7 +25,7 @@ function formatDate(dateStr) {
   });
 }
 
-function ProposalFeedCard({ item }) {
+function ActivityFeedCard({ item }) {
   const [expanded, setExpanded] = useState(false);
 
   const title = item.name;
@@ -36,8 +36,8 @@ function ProposalFeedCard({ item }) {
 
   return (
     <article className="feed-card" onClick={() => setExpanded(!expanded)}>
-      <div className="proposal-card-header">
-        <span className="proposal-card-date">{formatDate(voteDate)}</span>
+      <div className="activity-card-header">
+        <span className="activity-card-date">{formatDate(voteDate)}</span>
       </div>
 
       <h3 className="feed-card-title">{title}</h3>
@@ -58,33 +58,33 @@ function ProposalFeedCard({ item }) {
         </button>
       )}
 
-      <div className="proposal-votes-section">
-        <span className="proposal-votes-label">
+      <div className="activity-votes-section">
+        <span className="activity-votes-label">
           {votes.length} {votes.length === 1 ? "voto" : "votos"}
         </span>
-        <div className="proposal-votes-list">
+        <div className="activity-votes-list">
           {votes.map((v) => {
             const style = VOTE_STYLES[v.vote] || VOTE_STYLES["AUSENTE"];
             return (
               <div
                 key={v.deputyId}
-                className="proposal-vote-row"
+                className="activity-vote-row"
                 style={{
                   backgroundColor: `${style.color}08`,
                   borderColor: `${style.color}20`,
                 }}
               >
-                <div className="proposal-vote-deputy">
+                <div className="activity-vote-deputy">
                   <Avatar name={v.name || "??"} size={32} photo={v.photo} />
-                  <div className="proposal-vote-deputy-info">
-                    <span className="proposal-vote-deputy-name">{v.name}</span>
-                    <span className="proposal-vote-deputy-party">
+                  <div className="activity-vote-deputy-info">
+                    <span className="activity-vote-deputy-name">{v.name}</span>
+                    <span className="activity-vote-deputy-party">
                       {v.party} · {v.state}
                     </span>
                   </div>
                 </div>
-                <div className="proposal-vote-result">
-                  <span className="proposal-vote-emoji">{style.emoji}</span>
+                <div className="activity-vote-result">
+                  <span className="activity-vote-emoji">{style.emoji}</span>
                   <VoteBadge vote={v.vote} />
                 </div>
               </div>
@@ -100,4 +100,4 @@ function ProposalFeedCard({ item }) {
   );
 }
 
-export default ProposalFeedCard;
+export default ActivityFeedCard;
