@@ -12,6 +12,7 @@ public record ActivityResponse(
         String category,
         LocalDate voteDate,
         String externalId,
+        String description,
         String sourceProposalId
 ) {
 
@@ -25,6 +26,7 @@ public record ActivityResponse(
                 entity.getCategory(),
                 entity.getVoteDate(),
                 entity.getExternalId(),
+                entity.getDescription(),
                 entity.getSourceProposalId()
         );
     }

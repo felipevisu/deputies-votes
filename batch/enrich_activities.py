@@ -45,7 +45,17 @@ Regras:
 - Mencione o estágio atual da tramitação (se aprovado, rejeitado, em análise, etc).
 - Não use jargão jurídico ou legislativo sem explicar.
 - Escreva em português brasileiro.
-- NÃO use formatação Markdown (sem #, *, **, ```, etc). Retorne apenas texto puro."""
+- NÃO use formatação Markdown (sem #, *, **, ```, etc). Retorne apenas texto puro.
+
+IMPORTANTE — Diferenciação entre rodadas de votação:
+- Um mesmo projeto de lei pode ter MÚLTIPLAS votações (turno único, destaques, emendas, requerimentos).
+- O campo "descUltimaAberturaVotacao" indica QUAL ETAPA específica está sendo votada.
+- O campo "descricao" indica o RESULTADO dessa etapa específica.
+- O subtítulo e o resumo DEVEM refletir a etapa específica, não apenas o projeto em geral.
+- Se for um destaque (DTQ), explique que é uma votação separada de um trecho específico do projeto.
+- Se for votação em turno único, diga que é a votação principal do projeto.
+- Se for requerimento, explique o que o requerimento pede.
+- Inclua no resumo o resultado da votação (aprovado/rejeitado/mantido, com placar)."""
 
 
 def fetch_all_activities():

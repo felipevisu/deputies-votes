@@ -85,6 +85,7 @@ public class ActivityService {
         activity.setCategory(request.category());
         activity.setVoteDate(request.voteDate());
         activity.setExternalId(request.externalId());
+        activity.setDescription(request.description());
         activity.setVoteRound(request.voteRound());
     }
 }

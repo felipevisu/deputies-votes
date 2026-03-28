@@ -8,18 +8,16 @@ public record DeputyResponse(
         String party,
         String legend,
         String avatar,
-        boolean follow,
         Long externalId
 ) {
 
-    public static DeputyResponse from(Deputy entity, boolean follow) {
+    public static DeputyResponse from(Deputy entity) {
         return new DeputyResponse(
                 entity.getId(),
                 entity.getName(),
                 entity.getParty(),
                 entity.getState(),
                 entity.getAvatar(),
-                follow,
                 entity.getExternalId()
         );
     }

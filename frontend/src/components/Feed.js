@@ -44,14 +44,14 @@ function Feed({ items, hasMore, loading, onLoadMore }) {
         if (item.type === "PROPOSAL") {
           return (
             <ProposalFeedCard
-              key={`p-${item.proposalId}-${idx}`}
+              key={`p-${item.proposal.id}-${idx}`}
               item={item}
             />
           );
         }
         return (
           <ActivityFeedCard
-            key={`v-${item.activityId}-${idx}`}
+            key={`v-${item.activity.id}-${idx}`}
             item={item}
           />
         );

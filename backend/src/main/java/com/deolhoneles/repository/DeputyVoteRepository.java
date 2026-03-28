@@ -34,4 +34,6 @@ public interface DeputyVoteRepository extends JpaRepository<DeputyVote, Long> {
     List<DeputyVote> findVotesByActivityIdsAndDeputyIds(
             @Param("activityIds") List<Long> activityIds,
             @Param("deputyIds") List<Long> deputyIds);
+
+    boolean existsByDeputyIdAndActivityId(Long deputyId, Long activityId);
 }

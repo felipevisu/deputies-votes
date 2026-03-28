@@ -20,12 +20,13 @@ function formatDate(dateStr) {
 function ProposalFeedCard({ item }) {
   const [expanded, setExpanded] = useState(false);
 
-  const typeCode = item.proposalTypeCode;
-  const number = item.proposalNumber;
-  const year = item.proposalYear;
-  const ementa = item.proposalEmenta;
-  const status = item.proposalStatus;
-  const authors = item.authors || [];
+  const p = item.proposal;
+  const typeCode = p.typeCode;
+  const number = p.number;
+  const year = p.year;
+  const ementa = p.ementa;
+  const status = p.status;
+  const authors = p.authors || [];
   const date = item.date;
 
   const title = `${typeCode} ${number}/${year}`;

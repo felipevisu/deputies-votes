@@ -28,23 +28,24 @@ function formatDate(dateStr) {
 function ActivityFeedCard({ item }) {
   const [expanded, setExpanded] = useState(false);
 
-  const title = item.activityTitle;
-  const subtitle = item.activitySubtitle;
-  const voteRound = item.activityVoteRound;
-  const summary = item.activitySummary;
-  const author = item.activityAuthor;
+  const a = item.activity;
+  const title = a.title;
+  const subtitle = a.subtitle;
+  const voteRound = a.voteRound;
+  const summary = a.summary;
+  const author = a.author;
   const voteDate = item.date;
-  const votes = item.votes || [];
+  const votes = a.votes || [];
 
   return (
     <article className="feed-card" onClick={() => setExpanded(!expanded)}>
       <div className="activity-card-header">
-        {voteRound && <span className="activity-vote-round-badge">{voteRound}</span>}
         <span className="activity-card-date">{formatDate(voteDate)}</span>
       </div>
+      {voteRound && <p className="activity-vote-round">{voteRound}</p>}
 
-      <h3 className="feed-card-title">{title}</h3>
-      {subtitle && <p className="activity-card-subtitle">{subtitle}</p>}
+      <span className="activity-card-bill-number">{title}</span>
+      {subtitle && <h3 className="feed-card-title">{subtitle}</h3>}
 
       {summary && (
         <p className={`feed-card-summary ${expanded ? "expanded" : ""}`}>

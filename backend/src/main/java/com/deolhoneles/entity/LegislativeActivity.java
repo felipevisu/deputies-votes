@@ -37,6 +37,9 @@ public class LegislativeActivity {
     @Column(name = "external_id", unique = true, length = 100)
     private String externalId;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "vote_round", length = 500)
     private String voteRound;
 
@@ -66,6 +69,9 @@ public class LegislativeActivity {
 
     public String getExternalId() { return externalId; }
     public void setExternalId(String externalId) { this.externalId = externalId; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public String getVoteRound() { return voteRound; }
     public void setVoteRound(String voteRound) { this.voteRound = voteRound; }

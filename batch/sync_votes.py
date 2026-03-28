@@ -2,17 +2,20 @@
 Syncs voting sessions and individual deputy votes from the Camara API.
 
 Flow:
-1. Fetch recent voting sessions from GET /votacoes
-2. For each session, fetch details from GET /votacoes/{id}
-3. Create an activity in the backend (if not already present by external ID)
-4. Fetch individual votes from GET /votacoes/{id}/votos
-5. For each deputy vote, look up the deputy by external ID and create the vote
+1. Pre-load all deputies into a cache (one call)
+2. Fetch recent voting sessions from GET /votacoes
+3. Process sessions in parallel using a thread pool:
+   a. Fetch details from GET /votacoes/{id}
+   b. Create an activity in the backend (if not already present by external ID)
+   c. Fetch individual votes from GET /votacoes/{id}/votos
+   d. Bulk-create all votes in one request via POST /votes/batch
 
 Safe to run multiple times — skips activities and votes that already exist.
 """
 
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 import requests
 from config import CAMARA_API_BASE, BACKEND_BASE, REQUEST_DELAY
@@ -63,6 +66,21 @@ CATEGORY_MAP = {
     "CTASP": "Trabalho",
     "CDC": "Comunicacao",
 }
+
+PARALLEL_WORKERS = 4
+
+
+def load_deputy_cache():
+    """Load all deputies from backend into an external_id → id map."""
+    resp = requests.get(f"{BACKEND_BASE}/deputies", params={"page": 0, "size": 1000})
+    resp.raise_for_status()
+    deputies = resp.json().get("content", [])
+    cache = {}
+    for d in deputies:
+        ext_id = d.get("externalId")
+        if ext_id:
+            cache[int(ext_id)] = d["id"]
+    return cache
 
 
 def fetch_voting_sessions_paged(start_date, end_date):
@@ -121,24 +139,8 @@ def activity_exists(external_id):
     return resp.status_code == 200, resp.json() if resp.status_code == 200 else None
 
 
-def find_deputy_by_external_id(external_id):
-    """Look up a deputy by their Camara API ID."""
-    resp = requests.get(f"{BACKEND_BASE}/deputies/external/{external_id}")
-    if resp.status_code == 200:
-        return resp.json()
-    return None
-
-
 def extract_activity_info(session, details):
-    """Extract meaningful title, summary, and author from the API response.
-
-    Priority for title/summary:
-      1. proposicoesAfetadas[0] — the actual bill (e.g. "PL 2599/2024 - Altera a Lei...")
-      2. ultimaApresentacaoProposicao — the rapporteur's report
-      3. Fallback to session-level fields (vote result text)
-    """
     affected = details.get("proposicoesAfetadas", [])
-    last_presentation = details.get("ultimaApresentacaoProposicao") or {}
 
     if affected:
         prop = affected[0]
@@ -147,7 +149,6 @@ def extract_activity_info(session, details):
         ano = prop.get("ano", "")
         ementa = prop.get("ementa", "")
 
-        # Title is just the bill number (e.g. "PLP 77/2026")
         bill_id = f"{sigla} {numero}/{ano}" if sigla and numero and ano else ""
         title = bill_id or ementa or None
         summary = ementa or None
@@ -155,7 +156,6 @@ def extract_activity_info(session, details):
         title = None
         summary = None
 
-    # Fallback title/summary from session and details
     if not title:
         title = (details.get("objVotacao")
                  or session.get("proposicaoTexto")
@@ -166,7 +166,6 @@ def extract_activity_info(session, details):
                    or details.get("descricao")
                    or title)
 
-    # Author: use the organ name, keeping it short and clean
     organ = session.get("siglaOrgao", "")
     author = ORGAN_DISPLAY.get(organ, organ) or "Camara dos Deputados"
 
@@ -187,6 +186,8 @@ def create_activity(session, details):
     vote_round = session.get("descUltimaAberturaVotacao") or details.get("descUltimaAberturaVotacao") or ""
     vote_round = vote_round.strip().rstrip(".")
 
+    description = details.get("descricao", "")
+
     payload = {
         "title": title,
         "summary": summary,
@@ -194,6 +195,7 @@ def create_activity(session, details):
         "category": category,
         "voteDate": vote_date,
         "externalId": str(session["id"]),
+        "description": description,
         "voteRound": vote_round,
     }
     resp = requests.post(f"{BACKEND_BASE}/activities", json=payload)
@@ -201,18 +203,14 @@ def create_activity(session, details):
     return resp.json()
 
 
-def create_vote(deputy_id, activity_id, vote_type):
-    """Create a deputy vote in the backend."""
-    payload = {
-        "deputyId": deputy_id,
-        "activityId": activity_id,
-        "vote": vote_type,
-    }
-    resp = requests.post(f"{BACKEND_BASE}/votes", json=payload)
-    if resp.status_code == 201:
-        return True
-    # 500 likely means duplicate — skip silently
-    return False
+def create_votes_batch(votes_payload):
+    """Create multiple votes in one request. Returns count of created votes."""
+    if not votes_payload:
+        return 0
+    resp = requests.post(f"{BACKEND_BASE}/votes/batch", json=votes_payload)
+    if resp.status_code in (200, 201):
+        return len(resp.json())
+    return 0
 
 
 def map_vote_type(camara_vote):
@@ -220,88 +218,129 @@ def map_vote_type(camara_vote):
     return VOTE_TYPE_MAP.get(camara_vote, "AUSENTE")
 
 
-def sync(days_back=7):
-    end = date.today()
-    start = end - timedelta(days=days_back)
+def process_session(session, deputy_cache):
+    """Process a single voting session. Returns (activities_created, votes_created, deputies_not_found)."""
+    session_id = str(session["id"])
+
+    exists, _ = activity_exists(session_id)
+    if exists:
+        return session_id, "exists", 0, 0, 0
+
+    time.sleep(REQUEST_DELAY)
+    details = fetch_vote_details(session_id)
+    if details is None:
+        return session_id, "skipped", 0, 0, 0
+
+    try:
+        activity = create_activity(session, details)
+        activity_id = activity["id"]
+    except Exception as e:
+        return session_id, f"error: {e}", 0, 0, 0
+
+    # Enrich with AI summary
+    try:
+        from enrich_activities import enrich_activity
+        enrich_activity(activity)
+    except Exception:
+        pass
+
+    # Fetch individual votes and build batch payload
+    time.sleep(REQUEST_DELAY)
+    individual_votes = fetch_individual_votes(session_id)
+
+    batch_payload = []
+    deputies_not_found = 0
+
+    for iv in individual_votes:
+        deputy_ext_id = iv.get("deputado_", {}).get("id")
+        if not deputy_ext_id:
+            continue
+
+        deputy_id = deputy_cache.get(int(deputy_ext_id))
+        if not deputy_id:
+            deputies_not_found += 1
+            continue
+
+        vote_type = map_vote_type(iv.get("tipoVoto", ""))
+        batch_payload.append({
+            "deputyId": deputy_id,
+            "activityId": activity_id,
+            "vote": vote_type,
+        })
+
+    votes_created = create_votes_batch(batch_payload)
+
+    return session_id, "created", 1, votes_created, deputies_not_found
+
+
+def sync(days_back=7, start_date=None, end_date=None, cancel_check=None):
+    if start_date and end_date:
+        start = start_date
+        end = end_date
+    else:
+        end = date.today()
+        start = end - timedelta(days=days_back)
 
     print("=== Syncing Votes ===")
     print(f"Date range: {start} to {end}")
     print(f"Source: {CAMARA_API_BASE}/votacoes")
-    print(f"Target: {BACKEND_BASE}\n")
+    print(f"Target: {BACKEND_BASE}")
+    print(f"Workers: {PARALLEL_WORKERS}\n")
+
+    # Pre-load deputy cache
+    print("Loading deputy cache...")
+    deputy_cache = load_deputy_cache()
+    print(f"Cached {len(deputy_cache)} deputies\n")
+
+    # Collect all sessions first
+    print("Fetching all voting sessions...")
+    all_sessions = []
+    for page in fetch_voting_sessions_paged(str(start), str(end)):
+        all_sessions.extend(page)
+    print(f"Found {len(all_sessions)} sessions to process\n")
 
     activities_created = 0
     activities_skipped = 0
     votes_created = 0
-    votes_skipped = 0
     deputies_not_found = 0
-    stopped_early = False
+    cancelled = False
 
-    for page in fetch_voting_sessions_paged(str(start), str(end)):
-        for session in page:
-            session_id = str(session["id"])
-            print(f"Processing: {session_id}")
+    # Process sessions in parallel
+    with ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as executor:
+        futures = {}
+        for session in all_sessions:
+            if cancel_check and cancel_check():
+                cancelled = True
+                break
+            future = executor.submit(process_session, session, deputy_cache)
+            futures[future] = session["id"]
 
-            # Check if activity already exists — if so, we've caught up
-            exists, existing_activity = activity_exists(session_id)
-            if exists:
-                activities_skipped += 1
-                print(f"  Already exists (id={existing_activity['id']}), stopping — older sessions already synced")
-                stopped_early = True
+        for future in as_completed(futures):
+            if cancel_check and cancel_check():
+                cancelled = True
+                executor.shutdown(wait=False, cancel_futures=True)
                 break
 
-            time.sleep(REQUEST_DELAY)
-            details = fetch_vote_details(session_id)
-            if details is None:
-                print(f"  Skipped (404 from Camara API)")
-                continue
+            session_id, status, acts, votes, not_found = future.result()
 
-            try:
-                activity = create_activity(session, details)
-                activity_id = activity["id"]
-                activities_created += 1
-                print(f"  + Created activity (id={activity_id})")
-            except Exception as e:
-                print(f"  ! Error creating activity: {e}")
-                continue
-
-            # Enrich with AI summary
-            try:
-                from enrich_activities import enrich_activity
-                enrich_activity(activity)
-            except Exception as e:
-                print(f"  ! Enrichment skipped: {e}")
-
-            # Fetch and create individual votes
-            time.sleep(REQUEST_DELAY)
-            individual_votes = fetch_individual_votes(session_id)
-            print(f"  {len(individual_votes)} individual votes found")
-
-            for iv in individual_votes:
-                deputy_ext_id = iv.get("deputado_", {}).get("id")
-                if not deputy_ext_id:
-                    continue
-
-                deputy = find_deputy_by_external_id(deputy_ext_id)
-                if not deputy:
-                    deputies_not_found += 1
-                    continue
-
-                vote_type = map_vote_type(iv.get("tipoVoto", ""))
-                if create_vote(deputy["id"], activity_id, vote_type):
-                    votes_created += 1
-                else:
-                    votes_skipped += 1
-
-            time.sleep(REQUEST_DELAY)
-
-        if stopped_early:
-            break
+            if status == "exists":
+                activities_skipped += 1
+                print(f"  [{session_id}] Already exists")
+            elif status == "skipped":
+                print(f"  [{session_id}] Skipped (404)")
+            elif status.startswith("error"):
+                print(f"  [{session_id}] {status}")
+            else:
+                activities_created += acts
+                votes_created += votes
+                deputies_not_found += not_found
+                print(f"  [{session_id}] Created — {votes} votes")
 
     print(f"\n=== Summary ===")
-    if stopped_early:
-        print(f"Stopped early — reached already-synced sessions")
+    if cancelled:
+        print(f"Cancelled by user")
     print(f"Activities: {activities_created} created, {activities_skipped} already existed")
-    print(f"Votes: {votes_created} created, {votes_skipped} skipped (duplicates)")
+    print(f"Votes: {votes_created} created")
     if deputies_not_found:
         print(f"Deputies not found: {deputies_not_found} (run sync_deputies.py first)")
 

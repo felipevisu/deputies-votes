@@ -47,54 +47,58 @@ cd backend
 ## Database Schema
 
 ```
-account
-├── id (PK)
-├── name
-├── last_name
-└── email (unique)
-
 deputy
 ├── id (PK)
 ├── name
 ├── party
 ├── state
-└── avatar
+├── avatar
+└── external_id (unique)
 
-legislative_proposal
+legislative_activity
 ├── id (PK)
 ├── title
+├── subtitle
+├── description
 ├── summary
 ├── author
 ├── category
-└── vote_date
+├── vote_date
+├── external_id (unique)
+├── vote_round
+└── source_proposal_id
+
+proposal
+├── id (PK)
+├── external_id (unique)
+├── type_code
+├── number
+├── year
+├── ementa
+├── keywords
+├── presentation_date
+└── status_description
+
+proposal_author
+├── proposal_id (PK, FK → proposal)
+├── deputy_id (PK, FK → deputy)
+├── signing_order
+└── proponent
 
 deputy_vote
 ├── id (PK)
 ├── deputy_id (FK → deputy)
-├── proposal_id (FK → legislative_proposal)
+├── activity_id (FK → legislative_activity)
 └── vote (SIM | NAO | ABSTENCAO | AUSENTE)
-
-account_deputy_follow
-├── account_id (FK → account)
-└── deputy_id (FK → deputy)
 ```
 
 ### Entity Relationships
 
 ```
-Account ──M:N──> Deputy       (via account_deputy_follow)
 Deputy  <──1:N── DeputyVote
-LegislativeProposal <──1:N── DeputyVote
+LegislativeActivity <──1:N── DeputyVote
+Proposal <──1:N── ProposalAuthor ──N:1──> Deputy
 ```
-
-## Seed Data
-
-The migrations seed:
-- **1 account**: Default User (`user@deolhoneles.com`)
-- **10 deputies**: Ana Souza (PSD-SP), Carlos Mendes (PT-RJ), Fernanda Lima (MDB-MG), etc.
-- **15 legislative proposals**: across 10 categories (Economia, Tecnologia, Saude, etc.)
-- **150 deputy votes**: one per deputy per proposal
-- **5 follows**: default account follows deputies 1, 2, 4, 6, 8
 
 ## API Reference
 
@@ -111,97 +115,7 @@ All list endpoints return a paginated response:
 }
 ```
 
----
-
-### Accounts
-
-#### List accounts
-
-```
-GET /accounts?page=0&size=20
-```
-
-#### Get account
-
-```
-GET /accounts/{id}
-```
-
-**Response:**
-
-```json
-{
-  "id": 1,
-  "name": "Default",
-  "lastName": "User",
-  "email": "user@deolhoneles.com"
-}
-```
-
-#### Create account
-
-```
-POST /accounts
-Content-Type: application/json
-
-{
-  "name": "Felipe",
-  "lastName": "Faria",
-  "email": "felipe@example.com"
-}
-```
-
-**Response:** `201 Created`
-
-#### Update account
-
-```
-PUT /accounts/{id}
-Content-Type: application/json
-
-{
-  "name": "Felipe",
-  "lastName": "Faria",
-  "email": "felipe@example.com"
-}
-```
-
-#### Delete account
-
-```
-DELETE /accounts/{id}
-```
-
-**Response:** `204 No Content`
-
-#### Toggle follow
-
-Toggles whether the account follows a deputy. If already following, unfollows. If not following, follows.
-
-```
-PUT /accounts/{accountId}/deputies/{deputyId}/follow
-```
-
-**Response:**
-
-```json
-{
-  "id": 3,
-  "name": "Fernanda Lima",
-  "party": "MDB",
-  "legend": "MG",
-  "avatar": null,
-  "follow": true
-}
-```
-
-#### List followed deputies
-
-```
-GET /accounts/{accountId}/deputies
-```
-
-**Response:** array of `DeputyResponse`
+**Vote values:** `SIM`, `NÃO`, `ABSTENÇÃO`, `AUSENTE`
 
 ---
 
@@ -210,13 +124,11 @@ GET /accounts/{accountId}/deputies
 #### List deputies
 
 ```
-GET /deputies?accountId=1&followed=true&page=0&size=20
+GET /deputies?page=0&size=20
 ```
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
-| `accountId` | Long | No | Account ID to resolve follow state. Without it, `follow` is always `false`. |
-| `followed` | Boolean | No | Filter by follow state (`true`/`false`). Requires `accountId`. |
 | `page` | int | No | Page number (default: `0`) |
 | `size` | int | No | Page size (default: `20`) |
 
@@ -229,15 +141,23 @@ GET /deputies?accountId=1&followed=true&page=0&size=20
   "party": "PSD",
   "legend": "SP",
   "avatar": null,
-  "follow": true
+  "externalId": 12345
 }
 ```
 
 #### Get deputy
 
 ```
-GET /deputies/{id}?accountId=1
+GET /deputies/{id}
 ```
+
+#### Find deputy by external ID
+
+```
+GET /deputies/external/{externalId}
+```
+
+**Response:** `200` with `DeputyResponse`, or `404 Not Found`
 
 #### Create deputy
 
@@ -249,7 +169,8 @@ Content-Type: application/json
   "name": "New Deputy",
   "party": "PT",
   "state": "SP",
-  "avatar": null
+  "avatar": null,
+  "externalId": 12345
 }
 ```
 
@@ -265,7 +186,8 @@ Content-Type: application/json
   "name": "Updated Name",
   "party": "MDB",
   "state": "RJ",
-  "avatar": null
+  "avatar": null,
+  "externalId": 12345
 }
 ```
 
@@ -279,33 +201,136 @@ DELETE /deputies/{id}
 
 ---
 
-### Proposals
+### Activities
 
-#### List proposals
+Legislative activities (voting sessions).
+
+#### List activities
 
 ```
-GET /proposals?page=0&size=20
+GET /activities?page=0&size=20
 ```
 
-Returns proposals sorted by `voteDate` descending (most recent first).
+#### Get activity
 
-**Response item:**
+```
+GET /activities/{id}
+```
+
+**Response:**
 
 ```json
 {
   "id": 1,
   "title": "PL 1234/2026 - Reforma Tributaria",
+  "subtitle": "Simplifica impostos sobre consumo",
+  "description": "Aprovado o Projeto. Sim: 391; Não: 33; Abstenção: 2; Total: 426.",
   "summary": "Simplifica o sistema tributario brasileiro...",
   "author": "Comissao Especial da Camara",
   "category": "Economia",
-  "voteDate": "2026-03-25"
+  "voteDate": "2026-03-25",
+  "externalId": "2345678-9",
+  "sourceProposalId": "1234567"
 }
 ```
 
-#### Get proposal
+#### Find activity by external ID
 
 ```
-GET /proposals/{id}
+GET /activities/external/{externalId}
+```
+
+**Response:** `200` with `ActivityResponse`, or `404 Not Found`
+
+#### Create activity
+
+```
+POST /activities
+Content-Type: application/json
+
+{
+  "title": "PL 1234/2026 - Reforma Tributaria",
+  "summary": "Simplifica o sistema tributario brasileiro...",
+  "author": "Comissao Especial da Camara",
+  "category": "Economia",
+  "voteDate": "2026-03-25",
+  "externalId": "2345678-9",
+  "description": "Aprovado o Projeto. Sim: 391; Não: 33; Abstenção: 2; Total: 426.",
+  "voteRound": "Turno único"
+}
+```
+
+**Response:** `201 Created`
+
+#### Update activity
+
+```
+PUT /activities/{id}
+Content-Type: application/json
+
+{
+  "title": "PL 1234/2026 - Reforma Tributaria",
+  "summary": "Updated summary...",
+  "author": "Comissao Especial da Camara",
+  "category": "Economia",
+  "voteDate": "2026-03-25",
+  "externalId": "2345678-9",
+  "description": "Aprovado o Projeto. Sim: 391; Não: 33; Abstenção: 2; Total: 426.",
+  "voteRound": "Turno único"
+}
+```
+
+#### Enrich activity
+
+Adds subtitle, summary, and source proposal ID to an existing activity.
+
+```
+PATCH /activities/{id}/enrich
+Content-Type: application/json
+
+{
+  "subtitle": "Simplifica impostos sobre consumo",
+  "summary": "Simplifica o sistema tributario brasileiro...",
+  "sourceProposalId": "1234567"
+}
+```
+
+**Response:** `204 No Content`
+
+#### Delete activity
+
+```
+DELETE /activities/{id}
+```
+
+**Response:** `204 No Content`
+
+---
+
+### Proposals
+
+Legislative proposals authored by deputies.
+
+#### Find proposal by external ID
+
+```
+GET /proposals/external/{externalId}
+```
+
+**Response:** `200` with `ProposalResponse`, or `404 Not Found`
+
+```json
+{
+  "id": 1,
+  "externalId": 1234567,
+  "typeCode": "PL",
+  "number": 1234,
+  "year": 2026,
+  "ementa": "Dispoe sobre a reforma tributaria...",
+  "keywords": "tributos, impostos, reforma",
+  "presentationDate": "2026-01-15",
+  "statusDescription": "Aprovada"
+}
 ```
 
 #### Create proposal
@@ -315,132 +340,148 @@ POST /proposals
 Content-Type: application/json
 
 {
-  "title": "PL 9999/2026 - New Proposal",
-  "summary": "Description of the proposal",
-  "author": "Dep. Someone (PT-SP)",
-  "category": "Economia",
-  "voteDate": "2026-03-27"
+  "externalId": 1234567,
+  "typeCode": "PL",
+  "number": 1234,
+  "year": 2026,
+  "ementa": "Dispoe sobre a reforma tributaria...",
+  "keywords": "tributos, impostos, reforma",
+  "presentationDate": "2026-01-15",
+  "statusDescription": "Em tramitacao"
 }
 ```
 
 **Response:** `201 Created`
 
-#### Update proposal
+#### Add author to proposal
 
 ```
-PUT /proposals/{id}
+POST /proposals/{id}/authors
 Content-Type: application/json
 
 {
-  "title": "PL 9999/2026 - Updated Title",
-  "summary": "Updated description",
-  "author": "Dep. Someone (PT-SP)",
-  "category": "Tecnologia",
-  "voteDate": "2026-03-27"
+  "deputyId": 1,
+  "signingOrder": 1,
+  "proponent": true
 }
 ```
 
-#### Delete proposal
+**Response:** `201 Created`
+
+---
+
+### Votes
+
+#### Create vote
 
 ```
-DELETE /proposals/{id}
+POST /votes
+Content-Type: application/json
+
+{
+  "deputyId": 1,
+  "activityId": 1,
+  "vote": "SIM"
+}
 ```
 
-**Response:** `204 No Content`
+**Response:** `201 Created`
+
+```json
+{
+  "id": 1,
+  "deputyId": 1,
+  "activityId": 1,
+  "vote": "SIM"
+}
+```
 
 ---
 
 ### Feed
 
-Two feed modes are available. Both support infinite scroll via pagination and share the same request body.
+Unified feed combining voting activities and proposals authored by followed deputies, sorted by date descending.
 
-**Request body:**
+```
+POST /feed?page=0&size=10
+Content-Type: application/json
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `deputyIds` | Long[] | List of deputy IDs whose vote activity to return. Returns empty if null/empty. |
-
-**Pagination params (both endpoints):**
+{
+  "deputyIds": [1, 2, 4, 6, 8]
+}
+```
 
 | Param | Type | Required | Description |
 |-------|------|----------|-------------|
 | `page` | int | No | Page number (default: `0`) |
 | `size` | int | No | Page size (default: `10`) |
 
-**Vote values:** `SIM`, `NÃO`, `ABSTENÇÃO`, `AUSENTE`
+**Request body:**
 
-#### Deputies feed
+| Field | Type | Description |
+|-------|------|-------------|
+| `deputyIds` | Long[] | List of deputy IDs whose activity to return. Returns empty if null/empty. |
 
-One item per deputy vote. If 5 deputies voted on the same proposal, you get 5 items.
+The response contains two types of items distinguished by the `type` field. Null objects are omitted from the response.
 
-```
-POST /feed/deputies?page=0&size=10
-Content-Type: application/json
-
-{
-  "deputyIds": [1, 2, 4, 6, 8]
-}
-```
-
-**Response item:**
+#### VOTING item
 
 ```json
 {
-  "id": 1,
-  "name": "PL 1234/2026 - Reforma Tributaria",
-  "description": "Simplifica o sistema tributario brasileiro...",
-  "deputieName": "Ana Souza",
-  "deputieParty": "PSD - SP",
-  "deputiePhoto": "https://...",
-  "vote": "SIM",
-  "category": "Economia",
-  "author": "Comissao Especial da Camara",
-  "voteDate": "2026-03-25",
-  "deputyId": 1
+  "type": "VOTING",
+  "date": "2026-03-25",
+  "activity": {
+    "id": 1,
+    "externalId": "2345678-9",
+    "title": "PL 1234/2026 - Reforma Tributaria",
+    "subtitle": "Simplifica impostos sobre consumo",
+    "description": "Aprovado o Projeto. Sim: 391; Não: 33; Abstenção: 2; Total: 426.",
+    "voteRound": "Turno único",
+    "summary": "Simplifica o sistema tributario brasileiro...",
+    "author": "Comissao Especial da Camara",
+    "category": "Economia",
+    "votes": [
+      {
+        "deputyId": 1,
+        "name": "Ana Souza",
+        "party": "PSD",
+        "state": "SP",
+        "photo": "https://...",
+        "vote": "SIM"
+      }
+    ]
+  }
 }
 ```
 
-#### Proposals feed
-
-One item per proposal, grouping all followed deputies' votes together. Avoids duplication when multiple followed deputies voted on the same proposal.
-
-```
-POST /feed/proposals?page=0&size=10
-Content-Type: application/json
-
-{
-  "deputyIds": [1, 2, 4, 6, 8]
-}
-```
-
-**Response item:**
+#### PROPOSAL item
 
 ```json
 {
-  "proposalId": 1,
-  "name": "PL 1234/2026 - Reforma Tributaria",
-  "description": "Simplifica o sistema tributario brasileiro...",
-  "author": "Comissao Especial da Camara",
-  "voteDate": "2026-03-25",
-  "votes": [
-    {
-      "deputyId": 1,
-      "name": "Ana Souza",
-      "party": "PSD",
-      "state": "SP",
-      "photo": "https://...",
-      "vote": "SIM"
-    },
-    {
-      "deputyId": 2,
-      "name": "Carlos Mendes",
-      "party": "PT",
-      "state": "RJ",
-      "photo": null,
-      "vote": "NÃO"
-    }
-  ]
+  "type": "PROPOSAL",
+  "date": "2026-01-15",
+  "proposal": {
+    "id": 1,
+    "externalId": 1234567,
+    "typeCode": "PL",
+    "number": 1234,
+    "year": 2026,
+    "ementa": "Dispoe sobre a reforma tributaria...",
+    "status": "Aprovada",
+    "authors": [
+      {
+        "deputyId": 1,
+        "name": "Ana Souza",
+        "party": "PSD",
+        "state": "SP",
+        "photo": "https://...",
+        "signingOrder": 1,
+        "proponent": true
+      }
+    ]
+  }
 }
+```
 
 ---
 
@@ -457,43 +498,65 @@ backend/
     │   ├── config/
     │   │   └── WebConfig.java              # CORS (allows localhost:3000)
     │   ├── controller/
-    │   │   ├── AccountController.java
+    │   │   ├── ActivityController.java
     │   │   ├── DeputyController.java
     │   │   ├── FeedController.java
-    │   │   └── ProposalController.java
+    │   │   ├── ProposalController.java
+    │   │   └── VoteController.java
     │   ├── dto/
-    │   │   ├── AccountRequest.java
-    │   │   ├── AccountResponse.java
+    │   │   ├── ActivityRequest.java
+    │   │   ├── ActivityResponse.java
     │   │   ├── DeputyRequest.java
     │   │   ├── DeputyResponse.java
     │   │   ├── DeputyVoteSummary.java
+    │   │   ├── EnrichRequest.java
+    │   │   ├── FeedActivityItem.java
     │   │   ├── FeedItemResponse.java
+    │   │   ├── FeedProposalItem.java
     │   │   ├── FeedRequest.java
     │   │   ├── PageResponse.java
-    │   │   ├── ProposalFeedItemResponse.java
+    │   │   ├── ProposalAuthorRequest.java
+    │   │   ├── ProposalAuthorSummary.java
     │   │   ├── ProposalRequest.java
-    │   │   └── ProposalResponse.java
+    │   │   ├── ProposalResponse.java
+    │   │   ├── UnifiedFeedItemResponse.java
+    │   │   ├── VoteRequest.java
+    │   │   └── VoteResponse.java
     │   ├── entity/
-    │   │   ├── Account.java
     │   │   ├── Deputy.java
     │   │   ├── DeputyVote.java
-    │   │   ├── LegislativeProposal.java
+    │   │   ├── LegislativeActivity.java
+    │   │   ├── Proposal.java
+    │   │   ├── ProposalAuthor.java
+    │   │   ├── ProposalAuthorId.java
     │   │   └── VoteType.java
     │   ├── repository/
-    │   │   ├── AccountRepository.java
     │   │   ├── DeputyRepository.java
     │   │   ├── DeputyVoteRepository.java
-    │   │   └── LegislativeProposalRepository.java
+    │   │   ├── LegislativeActivityRepository.java
+    │   │   ├── ProposalAuthorRepository.java
+    │   │   └── ProposalRepository.java
     │   └── service/
-    │       ├── AccountService.java
+    │       ├── ActivityService.java
     │       ├── DeputyService.java
     │       ├── FeedService.java
-    │       └── ProposalService.java
+    │       ├── ProposalService.java
+    │       └── VoteService.java
     └── resources/
         ├── application.yml
         ├── application-docker.yml
         └── db/migration/
             ├── V1__create_schema.sql
             ├── V2__seed_data.sql
-            └── V3__add_account_and_follow.sql
+            ├── V3__add_account_and_follow.sql
+            ├── V4__add_external_id.sql
+            ├── V5__remove_mock_data.sql
+            ├── V6__widen_proposal_columns.sql
+            ├── V7__rename_proposal_to_activity.sql
+            ├── V8__add_proposal_tables.sql
+            ├── V9__add_enriched_title_and_source.sql
+            ├── V10__rename_enriched_title_to_subtitle.sql
+            ├── V11__add_vote_round.sql
+            ├── V12__drop_account_tables.sql
+            └── V13__add_activity_description.sql
 ```

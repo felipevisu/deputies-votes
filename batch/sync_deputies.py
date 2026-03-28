@@ -67,7 +67,11 @@ def create_deputy(camara_deputy):
     return resp.json()
 
 
-def sync():
+class CancelledError(Exception):
+    pass
+
+
+def sync(cancel_check=None):
     print("=== Syncing Deputies ===")
     print(f"Source: {CAMARA_API_BASE}/deputados (legislature {LEGISLATURE_ID})")
     print(f"Target: {BACKEND_BASE}/deputies\n")
@@ -79,6 +83,10 @@ def sync():
     skipped = 0
 
     for dep in deputies:
+        if cancel_check and cancel_check():
+            print("\n⛔ Cancelled by user")
+            break
+
         ext_id = dep["id"]
         name = dep["nome"]
 

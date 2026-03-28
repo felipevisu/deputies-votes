@@ -30,18 +30,14 @@ public class DeputyController {
 
     @GetMapping
     public PageResponse<DeputyResponse> listDeputies(
-            @RequestParam(required = false) Long accountId,
-            @RequestParam(required = false) Boolean followed,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return deputyService.listDeputies(accountId, followed, page, size);
+        return deputyService.listDeputies(page, size);
     }
 
     @GetMapping("/{id}")
-    public DeputyResponse getDeputy(
-            @PathVariable Long id,
-            @RequestParam(required = false) Long accountId) {
-        return deputyService.getDeputy(id, accountId);
+    public DeputyResponse getDeputy(@PathVariable Long id) {
+        return deputyService.getDeputy(id);
     }
 
     @GetMapping("/external/{externalId}")

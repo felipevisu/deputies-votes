@@ -11,6 +11,7 @@ public record ActivityRequest(
         @NotBlank String category,
         @NotNull LocalDate voteDate,
         String externalId,
+        String description,
         String voteRound
 ) {
 }

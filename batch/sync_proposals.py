@@ -128,9 +128,13 @@ def find_deputy_by_external_id(external_id):
     return None
 
 
-def sync(days_back=30):
-    end = date.today()
-    start = end - timedelta(days=days_back)
+def sync(days_back=30, start_date=None, end_date=None, cancel_check=None):
+    if start_date and end_date:
+        start = start_date
+        end = end_date
+    else:
+        end = date.today()
+        start = end - timedelta(days=days_back)
 
     print("=== Syncing Proposals ===")
     print(f"Date range: {start} to {end}")
@@ -143,8 +147,14 @@ def sync(days_back=30):
     proposals_created = 0
     proposals_skipped = 0
     authors_linked = 0
+    cancelled = False
 
     for dep in deputies:
+        if cancel_check and cancel_check():
+            print("\n⛔ Cancelled by user")
+            cancelled = True
+            break
+
         dep_ext_id = dep.get("externalId")
         if not dep_ext_id:
             continue
@@ -157,6 +167,11 @@ def sync(days_back=30):
 
         for page in fetch_proposals_for_deputy_paged(dep_ext_id, str(start), str(end)):
             for prop in page:
+                if cancel_check and cancel_check():
+                    print("\n⛔ Cancelled by user")
+                    cancelled = True
+                    break
+
                 prop_id = prop["id"]
 
                 exists, existing = proposal_exists(prop_id)
@@ -204,13 +219,18 @@ def sync(days_back=30):
 
                 time.sleep(REQUEST_DELAY)
 
-            if stopped_early:
+            if stopped_early or cancelled:
                 break
 
         if dep_proposals > 0:
             print(f"  {dep_proposals} proposals synced")
 
+        if cancelled:
+            break
+
     print(f"\n=== Summary ===")
+    if cancelled:
+        print("Cancelled by user")
     print(f"Proposals: {proposals_created} created, {proposals_skipped} already existed")
     print(f"Authors linked: {authors_linked}")
 
