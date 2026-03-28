@@ -181,9 +181,9 @@ def enrich_activity(activity):
         print(f"  ! Voting details not found (404)")
         return False
 
-    affected = details.get("proposicoesAfetadas", [])
+    affected = details.get("proposicoesAfetadas", []) or details.get("objetosPossiveis", [])
     if not affected:
-        print(f"  ! No proposicoesAfetadas — skipping")
+        print(f"  ! No proposicoesAfetadas or objetosPossiveis — skipping")
         return False
 
     proposal_uri = affected[0].get("uri")

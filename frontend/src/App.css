@@ -231,11 +231,24 @@ body {
   animation: fade-in-up 0.4s ease-out;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
+  border-top: 4px solid var(--border);
 }
 
 .feed-card:hover {
   box-shadow: var(--shadow);
   transform: translateY(-2px);
+}
+
+.feed-card.card-voting {
+  border-top-color: #f59e0b;
+}
+
+.feed-card.card-proposal {
+  border-top-color: var(--accent);
+}
+
+.feed-card.card-event {
+  border-top-color: #0d9488;
 }
 
 .feed-card:active {
@@ -365,8 +378,19 @@ body {
 .activity-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   margin-bottom: 10px;
+}
+
+.activity-type-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f59e0b;
+  color: white;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .activity-card-date {
@@ -561,6 +585,148 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.3px;
   flex-shrink: 0;
+}
+
+/* ============ Event Feed Card ============ */
+
+.event-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.event-type-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #0d9488;
+  color: white;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.event-card-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-light);
+}
+
+.event-organ {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.event-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.event-situation {
+  margin: 10px 0;
+}
+
+.event-situation-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+
+.event-situation-badge.ended {
+  background: var(--sim-bg);
+  color: var(--sim);
+}
+
+.event-situation-badge.cancelled {
+  background: var(--nao-bg);
+  color: var(--nao);
+}
+
+.event-situation-badge.upcoming {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.event-deputies-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.event-deputies-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.event-deputies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-deputy-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-bg);
+  border: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+.event-deputy-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-deputy-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.event-deputy-party {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.event-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.event-location {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.event-video-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--accent-bg);
+  transition: background 0.2s;
+}
+
+.event-video-link:hover {
+  background: rgba(124, 58, 237, 0.15);
 }
 
 /* ============ Avatar ============ */

@@ -32,7 +32,7 @@ function ProposalFeedCard({ item }) {
   const title = `${typeCode} ${number}/${year}`;
 
   return (
-    <article className="feed-card" onClick={() => setExpanded(!expanded)}>
+    <article className="feed-card card-proposal" onClick={() => setExpanded(!expanded)}>
       <div className="proposal-card-header">
         <span className="proposal-type-badge">{typeCode}</span>
         <span className="proposal-card-date">{formatDate(date)}</span>

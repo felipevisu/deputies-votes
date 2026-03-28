@@ -112,6 +112,7 @@ def start_job(job_name):
         "sync_deputies": ("Sync Deputies", _sync_deputies),
         "sync_votes": ("Sync Votes", _sync_votes),
         "sync_proposals": ("Sync Proposals", _sync_proposals),
+        "sync_events": ("Sync Events", _sync_events),
         "enrich_all": ("Enrich All Activities", _enrich_all),
         "full_sync": ("Full Sync", _full_sync),
     }
@@ -121,7 +122,7 @@ def start_job(job_name):
     name, target = targets[job_name]
 
     kwargs = {}
-    if start_date and end_date and job_name in ("sync_votes", "sync_proposals", "full_sync"):
+    if start_date and end_date and job_name in ("sync_votes", "sync_proposals", "sync_events", "full_sync"):
         kwargs["start_date"] = start_date
         kwargs["end_date"] = end_date
 
@@ -189,6 +190,11 @@ def _sync_proposals(start_date=None, end_date=None, cancel_check=None):
     sync(start_date=start_date, end_date=end_date, cancel_check=cancel_check)
 
 
+def _sync_events(start_date=None, end_date=None, cancel_check=None):
+    from sync_events import sync
+    sync(start_date=start_date, end_date=end_date, cancel_check=cancel_check)
+
+
 def _enrich_all(cancel_check=None):
     from enrich_activities import enrich_activity, fetch_all_activities, ANTHROPIC_API_KEY
     if not ANTHROPIC_API_KEY:
@@ -211,19 +217,23 @@ def _enrich_all(cancel_check=None):
 
 
 def _full_sync(start_date=None, end_date=None, cancel_check=None):
-    print("=== Step 1/4: Deputies ===\n")
+    print("=== Step 1/5: Deputies ===\n")
     _sync_deputies(cancel_check=cancel_check)
     if cancel_check and cancel_check():
         return
-    print("\n=== Step 2/4: Votes ===\n")
+    print("\n=== Step 2/5: Votes ===\n")
     _sync_votes(start_date=start_date, end_date=end_date, cancel_check=cancel_check)
     if cancel_check and cancel_check():
         return
-    print("\n=== Step 3/4: Proposals ===\n")
+    print("\n=== Step 3/5: Proposals ===\n")
     _sync_proposals(start_date=start_date, end_date=end_date, cancel_check=cancel_check)
     if cancel_check and cancel_check():
         return
-    print("\n=== Step 4/4: Enrich ===\n")
+    print("\n=== Step 4/5: Events ===\n")
+    _sync_events(start_date=start_date, end_date=end_date, cancel_check=cancel_check)
+    if cancel_check and cancel_check():
+        return
+    print("\n=== Step 5/5: Enrich ===\n")
     _enrich_all(cancel_check=cancel_check)
     print("\n=== All done! ===")
 
@@ -355,6 +365,11 @@ HTML_PAGE = """<!DOCTYPE html>
       <div class="name">Sync Proposals</div>
       <div class="desc">Fetch proposals by deputies</div>
     </div>
+    <div class="job-btn" onclick="runJob('sync_events')">
+      <div class="icon">📅</div>
+      <div class="name">Sync Events</div>
+      <div class="desc">Fetch committee sessions and hearings</div>
+    </div>
     <div class="job-btn" onclick="runJob('enrich_all')">
       <div class="icon">🤖</div>
       <div class="name">Enrich Activities</div>
@@ -363,7 +378,7 @@ HTML_PAGE = """<!DOCTYPE html>
     <div class="job-btn" onclick="runJob('full_sync')" style="grid-column: 1 / -1;">
       <div class="icon">🚀</div>
       <div class="name">Full Sync</div>
-      <div class="desc">Run all jobs: deputies → votes → proposals → enrich</div>
+      <div class="desc">Run all jobs: deputies → votes → proposals → events → enrich</div>
     </div>
   </div>
 

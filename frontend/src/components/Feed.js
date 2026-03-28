@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import ActivityFeedCard from "./ActivityFeedCard";
+import EventFeedCard from "./EventFeedCard";
 import ProposalFeedCard from "./ProposalFeedCard";
 
 function Feed({ items, hasMore, loading, onLoadMore }) {
@@ -45,6 +46,14 @@ function Feed({ items, hasMore, loading, onLoadMore }) {
           return (
             <ProposalFeedCard
               key={`p-${item.proposal.id}-${idx}`}
+              item={item}
+            />
+          );
+        }
+        if (item.type === "EVENT") {
+          return (
+            <EventFeedCard
+              key={`e-${item.event.id}-${idx}`}
               item={item}
             />
           );

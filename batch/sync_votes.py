@@ -140,7 +140,7 @@ def activity_exists(external_id):
 
 
 def extract_activity_info(session, details):
-    affected = details.get("proposicoesAfetadas", [])
+    affected = details.get("proposicoesAfetadas", []) or details.get("objetosPossiveis", [])
 
     if affected:
         prop = affected[0]

@@ -38,8 +38,9 @@ function ActivityFeedCard({ item }) {
   const votes = a.votes || [];
 
   return (
-    <article className="feed-card" onClick={() => setExpanded(!expanded)}>
+    <article className="feed-card card-voting" onClick={() => setExpanded(!expanded)}>
       <div className="activity-card-header">
+        <span className="activity-type-badge">Votacao</span>
         <span className="activity-card-date">{formatDate(voteDate)}</span>
       </div>
       {voteRound && <p className="activity-vote-round">{voteRound}</p>}
