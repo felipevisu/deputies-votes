@@ -10,6 +10,7 @@ public record ActivityRequest(
         @NotBlank String author,
         @NotBlank String category,
         @NotNull LocalDate voteDate,
-        String externalId
+        String externalId,
+        String voteRound
 ) {
 }

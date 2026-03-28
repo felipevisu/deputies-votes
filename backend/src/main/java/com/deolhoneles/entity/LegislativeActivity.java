@@ -19,6 +19,9 @@ public class LegislativeActivity {
     @Column(nullable = false, length = 500)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
+    private String subtitle;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String summary;
 
@@ -34,59 +37,39 @@ public class LegislativeActivity {
     @Column(name = "external_id", unique = true, length = 100)
     private String externalId;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "vote_round", length = 500)
+    private String voteRound;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Column(name = "source_proposal_id", length = 100)
+    private String sourceProposalId;
 
-    public String getTitle() {
-        return title;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public String getSummary() {
-        return summary;
-    }
+    public String getSubtitle() { return subtitle; }
+    public void setSubtitle(String subtitle) { this.subtitle = subtitle; }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
+    public String getSummary() { return summary; }
+    public void setSummary(String summary) { this.summary = summary; }
 
-    public String getAuthor() {
-        return author;
-    }
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getCategory() {
-        return category;
-    }
+    public LocalDate getVoteDate() { return voteDate; }
+    public void setVoteDate(LocalDate voteDate) { this.voteDate = voteDate; }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    public String getExternalId() { return externalId; }
+    public void setExternalId(String externalId) { this.externalId = externalId; }
 
-    public LocalDate getVoteDate() {
-        return voteDate;
-    }
+    public String getVoteRound() { return voteRound; }
+    public void setVoteRound(String voteRound) { this.voteRound = voteRound; }
 
-    public void setVoteDate(LocalDate voteDate) {
-        this.voteDate = voteDate;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
+    public String getSourceProposalId() { return sourceProposalId; }
+    public void setSourceProposalId(String sourceProposalId) { this.sourceProposalId = sourceProposalId; }
 }

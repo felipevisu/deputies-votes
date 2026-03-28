@@ -1,9 +1,8 @@
 package com.deolhoneles.controller;
 
-import com.deolhoneles.dto.ActivityFeedItemResponse;
-import com.deolhoneles.dto.FeedItemResponse;
 import com.deolhoneles.dto.FeedRequest;
 import com.deolhoneles.dto.PageResponse;
+import com.deolhoneles.dto.UnifiedFeedItemResponse;
 import com.deolhoneles.service.FeedService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,19 +20,11 @@ public class FeedController {
         this.feedService = feedService;
     }
 
-    @PostMapping("/deputies")
-    public PageResponse<FeedItemResponse> getFeed(
+    @PostMapping
+    public PageResponse<UnifiedFeedItemResponse> getUnifiedFeed(
             @RequestBody FeedRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return feedService.getFeed(request, page, size);
-    }
-
-    @PostMapping("/activities")
-    public PageResponse<ActivityFeedItemResponse> getActivityFeed(
-            @RequestBody FeedRequest request,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return feedService.getActivityFeed(request, page, size);
+        return feedService.getUnifiedFeed(request, page, size);
     }
 }

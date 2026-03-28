@@ -147,8 +147,7 @@ def extract_activity_info(session, details):
         ano = prop.get("ano", "")
         ementa = prop.get("ementa", "")
 
-        # Title is just the bill identifier (e.g. "PLP 77/2026")
-        # Summary holds the full description to avoid duplication in the UI
+        # Title is just the bill number (e.g. "PLP 77/2026")
         bill_id = f"{sigla} {numero}/{ano}" if sigla and numero and ano else ""
         title = bill_id or ementa or None
         summary = ementa or None
@@ -185,6 +184,9 @@ def create_activity(session, details):
     if len(title) > 500:
         title = title[:497] + "..."
 
+    vote_round = session.get("descUltimaAberturaVotacao") or details.get("descUltimaAberturaVotacao") or ""
+    vote_round = vote_round.strip().rstrip(".")
+
     payload = {
         "title": title,
         "summary": summary,
@@ -192,6 +194,7 @@ def create_activity(session, details):
         "category": category,
         "voteDate": vote_date,
         "externalId": str(session["id"]),
+        "voteRound": vote_round,
     }
     resp = requests.post(f"{BACKEND_BASE}/activities", json=payload)
     resp.raise_for_status()
@@ -260,6 +263,13 @@ def sync(days_back=7):
             except Exception as e:
                 print(f"  ! Error creating activity: {e}")
                 continue
+
+            # Enrich with AI summary
+            try:
+                from enrich_activities import enrich_activity
+                enrich_activity(activity)
+            except Exception as e:
+                print(f"  ! Enrichment skipped: {e}")
 
             # Fetch and create individual votes
             time.sleep(REQUEST_DELAY)

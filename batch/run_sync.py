@@ -1,5 +1,5 @@
 """
-Main entry point: syncs deputies first, then votes.
+Main entry point: syncs deputies, then votes, then proposals.
 
 Usage:
     python run_sync.py          # Sync votes from last 7 days
@@ -9,6 +9,7 @@ Usage:
 import sys
 from sync_deputies import sync as sync_deputies
 from sync_votes import sync as sync_votes
+from sync_proposals import sync as sync_proposals
 
 
 def main():
@@ -28,8 +29,15 @@ def main():
     activities_created, votes_created = sync_votes(days_back=days)
 
     print()
+    print("-" * 60)
+    print()
+
+    proposals_created = sync_proposals()
+
+    print()
     print("=" * 60)
-    print(f"  Total: {deputies_created} deputies, {activities_created} activities, {votes_created} votes")
+    print(f"  Total: {deputies_created} deputies, {activities_created} activities,")
+    print(f"         {votes_created} votes, {proposals_created} proposals")
     print("=" * 60)
 
 

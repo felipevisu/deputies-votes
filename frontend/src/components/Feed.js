@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import FeedCard from "./FeedCard";
 import ActivityFeedCard from "./ActivityFeedCard";
+import ProposalFeedCard from "./ProposalFeedCard";
 
-function Feed({ items, hasMore, loading, onLoadMore, feedMode }) {
+function Feed({ items, hasMore, loading, onLoadMore }) {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
 
@@ -38,17 +38,24 @@ function Feed({ items, hasMore, loading, onLoadMore, feedMode }) {
     );
   }
 
-  const CardComponent = feedMode === "activities" ? ActivityFeedCard : FeedCard;
-  const keyFn =
-    feedMode === "activities"
-      ? (item, idx) => `a-${item.activityId}-${idx}`
-      : (item, idx) => `${item.id}-${item.deputyId}-${idx}`;
-
   return (
     <div className="feed">
-      {items.map((item, idx) => (
-        <CardComponent key={keyFn(item, idx)} item={item} />
-      ))}
+      {items.map((item, idx) => {
+        if (item.type === "PROPOSAL") {
+          return (
+            <ProposalFeedCard
+              key={`p-${item.proposalId}-${idx}`}
+              item={item}
+            />
+          );
+        }
+        return (
+          <ActivityFeedCard
+            key={`v-${item.activityId}-${idx}`}
+            item={item}
+          />
+        );
+      })}
 
       {hasMore && (
         <div ref={sentinelRef} className="feed-sentinel">

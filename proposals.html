@@ -1,0 +1,1876 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Câmara API · Proposals Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #0f0e0c;
+        --paper: #f5f0e8;
+        --green: #1a6b3c;
+        --green-light: #d4edda;
+        --gold: #c9952a;
+        --gold-light: #fdf3dd;
+        --red: #8b2020;
+        --red-light: #f8e4e4;
+        --blue: #1a3a6b;
+        --blue-light: #dde8f8;
+        --border: #ccc5b0;
+        --muted: #6b6457;
+        --code-bg: #1e1c18;
+        --code-fg: #e8dfc8;
+        --tag-get: #1a6b3c;
+        --sidebar-w: 260px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Lora", Georgia, serif;
+        background: var(--paper);
+        color: var(--ink);
+        display: flex;
+        min-height: 100vh;
+        font-size: 16px;
+        line-height: 1.7;
+      }
+
+      /* ── SIDEBAR ──────────────────────────────── */
+      aside {
+        width: var(--sidebar-w);
+        min-height: 100vh;
+        background: var(--ink);
+        color: #e8dfc8;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 0 0 2rem;
+      }
+
+      .sidebar-brand {
+        padding: 2rem 1.5rem 1.5rem;
+        border-bottom: 1px solid #333;
+      }
+
+      .sidebar-brand .flag {
+        display: flex;
+        gap: 3px;
+        margin-bottom: 0.75rem;
+      }
+
+      .flag-bar {
+        height: 4px;
+        border-radius: 2px;
+      }
+
+      .flag-bar:nth-child(1) {
+        background: #009c3b;
+        flex: 2;
+      }
+      .flag-bar:nth-child(2) {
+        background: #fedf00;
+        flex: 1;
+      }
+      .flag-bar:nth-child(3) {
+        background: #002776;
+        flex: 1.5;
+      }
+
+      .sidebar-brand h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: #fff;
+        line-height: 1.2;
+      }
+
+      .sidebar-brand p {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.65rem;
+        color: #888;
+        margin-top: 0.25rem;
+      }
+
+      .sidebar-section {
+        padding: 1.5rem 1.5rem 0.5rem;
+      }
+
+      .sidebar-section-label {
+        font-family: "Syne", sans-serif;
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #666;
+        margin-bottom: 0.75rem;
+      }
+
+      .sidebar-section nav a {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: #b0a898;
+        font-family: "Syne", sans-serif;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.4rem 0.6rem;
+        border-radius: 4px;
+        margin-bottom: 0.15rem;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .sidebar-section nav a:hover,
+      .sidebar-section nav a.active {
+        background: #2a2820;
+        color: #fff;
+      }
+
+      .sidebar-section nav a .method-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.6rem;
+        font-weight: 500;
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        background: var(--green);
+        color: #fff;
+        flex-shrink: 0;
+      }
+
+      .sidebar-base-url {
+        margin: auto 1.5rem 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid #222;
+      }
+
+      .sidebar-base-url span {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.65rem;
+        color: #555;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .sidebar-base-url code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        color: #888;
+        word-break: break-all;
+      }
+
+      /* ── MAIN ─────────────────────────────────── */
+      main {
+        flex: 1;
+        min-width: 0;
+        padding: 3rem 4rem 6rem;
+        max-width: 900px;
+      }
+
+      /* Hero */
+      .hero {
+        border-bottom: 2px solid var(--ink);
+        padding-bottom: 2.5rem;
+        margin-bottom: 3.5rem;
+        position: relative;
+      }
+
+      .hero-eyebrow {
+        font-family: "Syne", sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .hero-eyebrow::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .hero h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin-bottom: 1rem;
+      }
+
+      .hero h1 em {
+        font-style: normal;
+        color: var(--green);
+      }
+
+      .hero-desc {
+        font-size: 1.05rem;
+        color: var(--muted);
+        max-width: 600px;
+        font-style: italic;
+      }
+
+      .hero-meta {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .meta-chip {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      .meta-chip.good {
+        background: var(--green-light);
+        border-color: var(--green);
+        color: var(--green);
+        font-weight: 500;
+      }
+
+      /* Section headers */
+      .section-number {
+        font-family: "Syne", sans-serif;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 0.5rem;
+      }
+
+      section {
+        margin-bottom: 4rem;
+        scroll-margin-top: 2rem;
+      }
+
+      section > h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--ink);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      section > p {
+        color: var(--muted);
+        margin-bottom: 1.25rem;
+        font-size: 0.97rem;
+      }
+
+      /* Endpoint block */
+      .endpoint-block {
+        margin-bottom: 3rem;
+      }
+
+      .endpoint-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .endpoint-header h3 {
+        font-family: "Syne", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1.3;
+      }
+
+      .method {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 500;
+        padding: 0.3rem 0.65rem;
+        border-radius: 4px;
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+      }
+
+      .method.get {
+        background: var(--green);
+        color: #fff;
+      }
+
+      .endpoint-url {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.82rem;
+        background: var(--code-bg);
+        color: #98d4a3;
+        padding: 0.85rem 1.25rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        overflow-x: auto;
+        display: block;
+        border-left: 3px solid var(--green);
+      }
+
+      .endpoint-desc {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin-bottom: 1.25rem;
+        font-style: italic;
+      }
+
+      /* Parameter table */
+      .param-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .param-table thead th {
+        font-family: "Syne", sans-serif;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        text-align: left;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 2px solid var(--border);
+      }
+
+      .param-table tbody td {
+        padding: 0.6rem 0.75rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      .param-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .param-name {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 500;
+        font-size: 0.8rem;
+        color: var(--blue);
+      }
+
+      .param-type {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+
+      .badge {
+        display: inline-block;
+        font-family: "Syne", sans-serif;
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 0.1rem 0.4rem;
+        border-radius: 3px;
+      }
+
+      .badge.required {
+        background: var(--red-light);
+        color: var(--red);
+      }
+      .badge.optional {
+        background: #eee;
+        color: #888;
+      }
+      .badge.filter {
+        background: var(--blue-light);
+        color: var(--blue);
+      }
+
+      /* Code block */
+      pre {
+        background: var(--code-bg);
+        color: var(--code-fg);
+        padding: 1.25rem 1.5rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        line-height: 1.65;
+        margin-bottom: 1.25rem;
+        position: relative;
+      }
+
+      pre .label {
+        display: block;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #333;
+      }
+
+      .kw {
+        color: #c792ea;
+      }
+      .str {
+        color: #c3e88d;
+      }
+      .num {
+        color: #f78c6c;
+      }
+      .key {
+        color: #82aaff;
+      }
+      .cmt {
+        color: #546e7a;
+        font-style: italic;
+      }
+      .url {
+        color: #98d4a3;
+      }
+      .var {
+        color: #ffcb6b;
+      }
+
+      /* Callout boxes */
+      .callout {
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-bottom: 1.25rem;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .callout-icon {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 0.05rem;
+      }
+      .callout-body {
+        flex: 1;
+      }
+      .callout-body strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-family: "Syne", sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+
+      .callout.info {
+        background: var(--blue-light);
+        border-left: 3px solid var(--blue);
+        color: var(--blue);
+      }
+      .callout.tip {
+        background: var(--green-light);
+        border-left: 3px solid var(--green);
+        color: var(--green);
+      }
+      .callout.warn {
+        background: var(--gold-light);
+        border-left: 3px solid var(--gold);
+        color: #7a5a10;
+      }
+
+      /* Flow diagram */
+      .flow {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin: 1.5rem 0;
+        font-size: 0.875rem;
+      }
+
+      .flow-step {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .flow-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex-shrink: 0;
+        width: 36px;
+      }
+
+      .flow-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: #fff;
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .flow-line {
+        width: 2px;
+        background: var(--border);
+        flex: 1;
+        min-height: 24px;
+        margin: 4px 0;
+      }
+
+      .flow-content {
+        padding: 0.5rem 0 1.5rem;
+        flex: 1;
+      }
+
+      .flow-content h4 {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        color: var(--ink);
+      }
+
+      .flow-content p {
+        color: var(--muted);
+        font-size: 0.875rem;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      /* Response schema */
+      .schema-block {
+        background: #faf8f3;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+      }
+
+      .schema-block-header {
+        font-family: "Syne", sans-serif;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding: 0.6rem 1rem;
+        background: #f0ece2;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .schema-field {
+        display: flex;
+        gap: 1rem;
+        padding: 0.55rem 1rem;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.845rem;
+        align-items: baseline;
+      }
+
+      .schema-field:last-child {
+        border-bottom: none;
+      }
+
+      .schema-field-name {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 500;
+        font-size: 0.78rem;
+        color: var(--blue);
+        min-width: 170px;
+        flex-shrink: 0;
+      }
+
+      .schema-field-desc {
+        color: var(--muted);
+        font-size: 0.845rem;
+        flex: 1;
+        font-style: italic;
+      }
+
+      /* Status indicators */
+      .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .status-card {
+        padding: 0.875rem 1rem;
+        border-radius: 6px;
+        border: 1px solid transparent;
+      }
+
+      .status-card.approve {
+        background: var(--green-light);
+        border-color: #a8d5b5;
+      }
+      .status-card.reject {
+        background: var(--red-light);
+        border-color: #d5a8a8;
+      }
+      .status-card.pend {
+        background: var(--gold-light);
+        border-color: #d5c08a;
+      }
+      .status-card.arch {
+        background: #efefef;
+        border-color: #ccc;
+      }
+
+      .status-card h4 {
+        font-family: "Syne", sans-serif;
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+      }
+
+      .status-card.approve h4 {
+        color: var(--green);
+      }
+      .status-card.reject h4 {
+        color: var(--red);
+      }
+      .status-card.pend h4 {
+        color: #7a5a10;
+      }
+      .status-card.arch h4 {
+        color: #666;
+      }
+
+      .status-card p {
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.45;
+        margin: 0;
+      }
+
+      .divider {
+        border: none;
+        border-top: 2px solid var(--border);
+        margin: 2.5rem 0;
+      }
+
+      /* inline code */
+      code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.82em;
+        background: #ede9df;
+        padding: 0.1em 0.35em;
+        border-radius: 3px;
+        color: var(--blue);
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        color: inherit;
+      }
+
+      /* toc link used in sidebar active state via JS */
+      @media (max-width: 900px) {
+        aside {
+          display: none;
+        }
+        main {
+          padding: 2rem 1.5rem 4rem;
+        }
+        .hero h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ─── SIDEBAR ─────────────────────────────── -->
+    <aside>
+      <div class="sidebar-brand">
+        <div class="flag">
+          <div class="flag-bar"></div>
+          <div class="flag-bar"></div>
+          <div class="flag-bar"></div>
+        </div>
+        <h1>Câmara dos<br />Deputados API</h1>
+        <p>Dados Abertos · v2</p>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Overview</div>
+        <nav>
+          <a href="#intro">Introduction</a>
+          <a href="#flow">How it works</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Proposals</div>
+        <nav>
+          <a href="#list-proposals"
+            ><span class="method-tag">GET</span> List proposals</a
+          >
+          <a href="#get-proposal"
+            ><span class="method-tag">GET</span> Get by ID</a
+          >
+          <a href="#get-authors"><span class="method-tag">GET</span> Authors</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Events & Status</div>
+        <nav>
+          <a href="#tramitacoes"
+            ><span class="method-tag">GET</span> Tramitações</a
+          >
+          <a href="#votacoes"><span class="method-tag">GET</span> Votações</a>
+          <a href="#status-codes">Status reference</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Recipes</div>
+        <nav>
+          <a href="#recipe-latest">Latest proposals</a>
+          <a href="#recipe-deputy">By deputy</a>
+          <a href="#recipe-full">Full proposal history</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-base-url">
+        <span>Base URL</span>
+        <code>https://dadosabertos.camara.leg.br/api/v2</code>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN ─────────────────────────────────── -->
+    <main>
+      <!-- HERO -->
+      <div class="hero">
+        <div class="hero-eyebrow">Dados Abertos · API Reference</div>
+        <h1>Proposals,<br />Authors &<br /><em>Tramitações</em></h1>
+        <p class="hero-desc">
+          How to retrieve legislative proposals, their authors, and follow every
+          event — from submission to approval or rejection.
+        </p>
+        <div class="hero-meta">
+          <span class="meta-chip good">No auth required</span>
+          <span class="meta-chip">JSON responses</span>
+          <span class="meta-chip">REST / HTTP GET</span>
+          <span class="meta-chip">Updated daily</span>
+        </div>
+      </div>
+
+      <!-- ─── INTRO ─── -->
+      <section id="intro">
+        <div class="section-number">Section 01</div>
+        <h2>Introduction</h2>
+        <p>
+          The <strong>Dados Abertos API</strong> from Câmara dos Deputados
+          exposes legislative data publicly with no authentication. All requests
+          are plain HTTP <code>GET</code>. Responses are JSON.
+        </p>
+
+        <div class="callout info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-body">
+            <strong>Base URL</strong>
+            All endpoints in this guide are relative to
+            <code>https://dadosabertos.camara.leg.br/api/v2</code>. The API does
+            not require API keys or tokens.
+          </div>
+        </div>
+
+        <p>
+          A <strong>proposição</strong> (proposal) is any legislative document
+          formally presented to the Câmara: a <em>Projeto de Lei</em> (PL), a
+          <em>Proposta de Emenda à Constituição</em> (PEC), a
+          <em>Medida Provisória</em> (MPV), and many others.
+        </p>
+
+        <p>
+          Once submitted, a proposal moves through
+          <strong>tramitações</strong> — a sequential log of every action taken
+          on it (committee reviews, votes, approvals, rejections, archiving).
+          Understanding this chain tells you the full lifecycle of any bill.
+        </p>
+      </section>
+
+      <!-- ─── HOW IT WORKS ─── -->
+      <section id="flow">
+        <div class="section-number">Section 02</div>
+        <h2>How it works</h2>
+        <p>
+          Here is the typical sequence of calls needed to go from a list of
+          proposals all the way to knowing who authored them and what happened
+          at each stage.
+        </p>
+
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-left">
+              <div class="flow-dot">1</div>
+              <div class="flow-line"></div>
+            </div>
+            <div class="flow-content">
+              <h4>List proposals</h4>
+              <p>
+                Call <code>GET /proposicoes</code> with date filters and sorting
+                to get a paginated list. Each item returns an <code>id</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-left">
+              <div class="flow-dot">2</div>
+              <div class="flow-line"></div>
+            </div>
+            <div class="flow-content">
+              <h4>Get proposal details</h4>
+              <p>
+                Use the <code>id</code> to call
+                <code>GET /proposicoes/{id}</code> for the full ementa, current
+                status, and related documents.
+              </p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-left">
+              <div class="flow-dot">3</div>
+              <div class="flow-line"></div>
+            </div>
+            <div class="flow-content">
+              <h4>Fetch authors</h4>
+              <p>
+                Call <code>GET /proposicoes/{id}/autores</code> to list every
+                deputy or entity who signed the proposal.
+              </p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-left">
+              <div class="flow-dot">4</div>
+              <div class="flow-line"></div>
+            </div>
+            <div class="flow-content">
+              <h4>Follow the tramitação</h4>
+              <p>
+                Call <code>GET /proposicoes/{id}/tramitacoes</code> to get an
+                ordered log of all legislative events: who evaluated it, when,
+                and with what outcome.
+              </p>
+            </div>
+          </div>
+
+          <div class="flow-step">
+            <div class="flow-left">
+              <div class="flow-dot">5</div>
+              <div class="flow-line" style="background: transparent"></div>
+            </div>
+            <div class="flow-content">
+              <h4>Check voting records</h4>
+              <p>
+                Call <code>GET /votacoes?idProposicao={id}</code> to retrieve
+                official vote tallies from sessions where the proposal was voted
+                on.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── LIST PROPOSALS ─── -->
+      <section id="list-proposals">
+        <div class="section-number">Section 03</div>
+        <h2>List proposals</h2>
+        <p>
+          Returns a paginated list of proposals matching the given filters. The
+          results support filtering by date, type, keyword, author, and more.
+        </p>
+
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <h3>/proposicoes</h3>
+          </div>
+
+          <code class="endpoint-url"
+            >https://dadosabertos.camara.leg.br/api/v2/proposicoes</code
+          >
+
+          <p class="endpoint-desc">
+            Returns summary objects for each matching proposal. Use
+            <code>ordenarPor=dataApresentacao&amp;ordem=DESC</code> to get the
+            most recent first.
+          </p>
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="param-name">dataApresentacaoInicio</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>Start date filter — format <code>YYYY-MM-DD</code></td>
+              </tr>
+              <tr>
+                <td><span class="param-name">dataApresentacaoFim</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>End date filter — format <code>YYYY-MM-DD</code></td>
+              </tr>
+              <tr>
+                <td><span class="param-name">siglaTipo</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>
+                  Type of proposal: <code>PL</code>, <code>PEC</code>,
+                  <code>MPV</code>, <code>PDC</code>, <code>REQ</code>, etc.
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">numero</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>Official number of the proposal within its year</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">ano</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>
+                  Year the proposal was submitted (e.g. <code>2026</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">idDeputadoAutor</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>Filter by a specific deputy's numeric ID</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">autor</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>Partial name search across all authors</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">siglaPartidoAutor</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>
+                  Author's party acronym — e.g. <code>PT</code>,
+                  <code>PL</code>, <code>PSDB</code>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">keywords</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>Free-text keyword search in the ementa and subject tags</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">codSituacao</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>
+                  Current status code — see the Status reference section below
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">ordenarPor</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>
+                  Field to sort by: <code>dataApresentacao</code>,
+                  <code>id</code>, <code>ano</code>, <code>numero</code>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">ordem</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>
+                  <code>ASC</code> or <code>DESC</code> — default is
+                  <code>ASC</code>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">itens</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>
+                  Results per page — max <code>100</code>, default
+                  <code>15</code>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">pagina</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>Page number for pagination — default <code>1</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><span class="label">// Example request — 10 most recent PLs from 2026</span><span class="url">GET https://dadosabertos.camara.leg.br/api/v2/proposicoes
+  ?siglaTipo=PL
+  &amp;dataApresentacaoInicio=2026-01-01
+  &amp;ordenarPor=dataApresentacao
+  &amp;ordem=DESC
+  &amp;itens=10</span></pre>
+
+          <pre><span class="label">// Sample response</span>{
+  <span class="key">"dados"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="num">2650431</span>,
+      <span class="key">"uri"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/proposicoes/2650431"</span>,
+      <span class="key">"siglaTipo"</span>: <span class="str">"PL"</span>,
+      <span class="key">"codTipo"</span>: <span class="num">139</span>,
+      <span class="key">"numero"</span>: <span class="num">512</span>,
+      <span class="key">"ano"</span>: <span class="num">2026</span>,
+      <span class="key">"ementa"</span>: <span class="str">"Altera a Lei nº 9.394, de 20 de dezembro de 1996..."</span>,
+      <span class="key">"dataApresentacao"</span>: <span class="str">"2026-03-15T00:00:00"</span>
+    }
+    <span class="cmt">// ... more items</span>
+  ],
+  <span class="key">"links"</span>: [
+    { <span class="key">"rel"</span>: <span class="str">"next"</span>, <span class="key">"href"</span>: <span class="str">"...&amp;pagina=2"</span> },
+    { <span class="key">"rel"</span>: <span class="str">"last"</span>, <span class="key">"href"</span>: <span class="str">"...&amp;pagina=48"</span> }
+  ]
+}</pre>
+
+          <div class="schema-block">
+            <div class="schema-block-header">Response fields — dados[ ]</div>
+            <div class="schema-field">
+              <span class="schema-field-name">id</span
+              ><span class="schema-field-desc"
+                >Unique numeric ID — use this in all sub-resource calls</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">uri</span
+              ><span class="schema-field-desc"
+                >Full URL to the proposal's detail endpoint</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">siglaTipo</span
+              ><span class="schema-field-desc"
+                >Short type code: PL, PEC, MPV, REQ, etc.</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">numero</span
+              ><span class="schema-field-desc"
+                >Sequential number within the year</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">ano</span
+              ><span class="schema-field-desc">Year of presentation</span>
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">ementa</span
+              ><span class="schema-field-desc"
+                >Official summary text of the proposal</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">dataApresentacao</span
+              ><span class="schema-field-desc"
+                >ISO 8601 date of submission</span
+              >
+            </div>
+          </div>
+
+          <div class="callout tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">
+              <strong>Pagination</strong>
+              Use the <code>links</code> array in the response — the
+              <code>next</code> and <code>last</code> entries contain ready-made
+              URLs to fetch subsequent pages.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── GET PROPOSAL ─── -->
+      <section id="get-proposal">
+        <div class="section-number">Section 04</div>
+        <h2>Get proposal details</h2>
+        <p>
+          Returns the full record for a single proposal, including its current
+          status, subject area, related documents, and most recent tramitação.
+        </p>
+
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <h3>/proposicoes/{id}</h3>
+          </div>
+
+          <code class="endpoint-url"
+            >https://dadosabertos.camara.leg.br/api/v2/proposicoes/<span
+              style="color: #ffcb6b"
+              >{id}</span
+            ></code
+          >
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="param-name">id</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge required">required</span></td>
+                <td>The proposal's numeric ID from the listing endpoint</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><span class="label">// Example</span><span class="url">GET https://dadosabertos.camara.leg.br/api/v2/proposicoes/2650431</span></pre>
+
+          <pre><span class="label">// Sample response — dados object</span>{
+  <span class="key">"dados"</span>: {
+    <span class="key">"id"</span>: <span class="num">2650431</span>,
+    <span class="key">"uri"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/proposicoes/2650431"</span>,
+    <span class="key">"siglaTipo"</span>: <span class="str">"PL"</span>,
+    <span class="key">"numero"</span>: <span class="num">512</span>,
+    <span class="key">"ano"</span>: <span class="num">2026</span>,
+    <span class="key">"ementa"</span>: <span class="str">"Altera a Lei nº 9.394..."</span>,
+    <span class="key">"ementaDetalhada"</span>: <span class="str">"Texto completo da justificativa..."</span>,
+    <span class="key">"keywords"</span>: <span class="str">"EDUCAÇÃO BÁSICA, CURRÍCULO, ENSINO FUNDAMENTAL"</span>,
+    <span class="key">"dataApresentacao"</span>: <span class="str">"2026-03-15T00:00:00"</span>,
+    <span class="key">"statusProposicao"</span>: {
+      <span class="key">"dataHora"</span>: <span class="str">"2026-03-20T14:30:00"</span>,
+      <span class="key">"sequencia"</span>: <span class="num">5</span>,
+      <span class="key">"siglaOrgao"</span>: <span class="str">"CCJ"</span>,        <span class="cmt">// Current committee</span>
+      <span class="key">"descricaoSituacao"</span>: <span class="str">"Aguardando Designação de Relator"</span>,
+      <span class="key">"despacho"</span>: <span class="str">"Encaminhada à Comissão de Constituição e Justiça"</span>,
+      <span class="key">"url"</span>: <span class="str">"https://..."</span>
+    },
+    <span class="key">"uriAutores"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/proposicoes/2650431/autores"</span>,
+    <span class="key">"uriRelacionadas"</span>: <span class="str">"https://...relacionadas"</span>
+  }
+}</pre>
+
+          <div class="schema-block">
+            <div class="schema-block-header">
+              Key fields inside statusProposicao
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">siglaOrgao</span
+              ><span class="schema-field-desc"
+                >Acronym of the committee or body currently handling the
+                proposal</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">descricaoSituacao</span
+              ><span class="schema-field-desc"
+                >Human-readable status description</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">despacho</span
+              ><span class="schema-field-desc"
+                >Official dispatch text from the most recent action</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">dataHora</span
+              ><span class="schema-field-desc"
+                >Timestamp of the last status update</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">sequencia</span
+              ><span class="schema-field-desc"
+                >Step number in the tramitação sequence</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── AUTHORS ─── -->
+      <section id="get-authors">
+        <div class="section-number">Section 05</div>
+        <h2>Fetch authors</h2>
+        <p>
+          Returns everyone who signed the proposal. By the Câmara's rules
+          (Regimento Interno, art. 102), all signatories are considered
+          co-authors — but only the first signatory may write the formal
+          justification.
+        </p>
+
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <h3>/proposicoes/{id}/autores</h3>
+          </div>
+
+          <code class="endpoint-url"
+            >https://dadosabertos.camara.leg.br/api/v2/proposicoes/<span
+              style="color: #ffcb6b"
+              >{id}</span
+            >/autores</code
+          >
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="param-name">id</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge required">required</span></td>
+                <td>Proposal ID</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><span class="label">// Example</span><span class="url">GET https://dadosabertos.camara.leg.br/api/v2/proposicoes/2650431/autores</span></pre>
+
+          <pre><span class="label">// Sample response</span>{
+  <span class="key">"dados"</span>: [
+    {
+      <span class="key">"uri"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/deputados/204501"</span>,
+      <span class="key">"nome"</span>: <span class="str">"Alencar Santana"</span>,
+      <span class="key">"codTipo"</span>: <span class="num">10000</span>,           <span class="cmt">// 10000 = Deputy</span>
+      <span class="key">"tipo"</span>: <span class="str">"Deputado(a)"</span>,
+      <span class="key">"ordemAssinatura"</span>: <span class="num">1</span>,     <span class="cmt">// 1 = lead author</span>
+      <span class="key">"proponente"</span>: <span class="num">1</span>            <span class="cmt">// 1 = primary proponent</span>
+    },
+    {
+      <span class="key">"uri"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/deputados/220554"</span>,
+      <span class="key">"nome"</span>: <span class="str">"Alexandre Lindenmeyer"</span>,
+      <span class="key">"codTipo"</span>: <span class="num">10000</span>,
+      <span class="key">"tipo"</span>: <span class="str">"Deputado(a)"</span>,
+      <span class="key">"ordemAssinatura"</span>: <span class="num">2</span>,
+      <span class="key">"proponente"</span>: <span class="num">0</span>
+    }
+  ]
+}</pre>
+
+          <div class="schema-block">
+            <div class="schema-block-header">Response fields — dados[ ]</div>
+            <div class="schema-field">
+              <span class="schema-field-name">uri</span
+              ><span class="schema-field-desc"
+                >Link to the deputy's full profile in the API</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">nome</span
+              ><span class="schema-field-desc">Parliamentary name</span>
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">tipo</span
+              ><span class="schema-field-desc"
+                >Author type: "Deputado(a)", "Senado Federal", "Poder
+                Executivo", etc.</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">ordemAssinatura</span
+              ><span class="schema-field-desc"
+                >Signing order — <code>1</code> is the lead author</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">proponente</span
+              ><span class="schema-field-desc"
+                ><code>1</code> = primary proponent, <code>0</code> =
+                co-signer</span
+              >
+            </div>
+          </div>
+
+          <div class="callout tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-body">
+              <strong>Get deputy details</strong>
+              Take the <code>uri</code> from each author record and call it
+              directly to get the deputy's party, state, photo, and full
+              biography — e.g. <code>GET /deputados/204501</code>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TRAMITACOES ─── -->
+      <section id="tramitacoes">
+        <div class="section-number">Section 06</div>
+        <h2>Tramitações — legislative history</h2>
+        <p>
+          Every action taken on a proposal generates a
+          <em>tramitação</em> record. This is the authoritative chronological
+          log: committee assignments, opinions, dispatch decisions, approvals,
+          and rejections. The list is ordered by <code>sequencia</code>.
+        </p>
+
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <h3>/proposicoes/{id}/tramitacoes</h3>
+          </div>
+
+          <code class="endpoint-url"
+            >https://dadosabertos.camara.leg.br/api/v2/proposicoes/<span
+              style="color: #ffcb6b"
+              >{id}</span
+            >/tramitacoes</code
+          >
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="param-name">id</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge required">required</span></td>
+                <td>Proposal ID</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">dataInicio</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>
+                  Filter events on or after this date (<code>YYYY-MM-DD</code>)
+                </td>
+              </tr>
+              <tr>
+                <td><span class="param-name">dataFim</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>
+                  Filter events on or before this date (<code>YYYY-MM-DD</code>)
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><span class="label">// Example — all events for proposal 2650431</span><span class="url">GET https://dadosabertos.camara.leg.br/api/v2/proposicoes/2650431/tramitacoes</span></pre>
+
+          <pre><span class="label">// Sample response</span>{
+  <span class="key">"dados"</span>: [
+    {
+      <span class="key">"dataHora"</span>: <span class="str">"2026-03-15T09:00:00"</span>,
+      <span class="key">"sequencia"</span>: <span class="num">1</span>,
+      <span class="key">"siglaOrgao"</span>: <span class="str">"Mesa"</span>,
+      <span class="key">"descricaoSituacao"</span>: <span class="str">"Encaminhada para publicação"</span>,
+      <span class="key">"descricaoTramitacao"</span>: <span class="str">"Apresentação de Proposição"</span>,
+      <span class="key">"despacho"</span>: <span class="str">"Encaminhada à Comissão de Educação"</span>,
+      <span class="key">"url"</span>: <span class="str">"https://www.camara.leg.br/..."</span>
+    },
+    {
+      <span class="key">"dataHora"</span>: <span class="str">"2026-03-18T14:22:00"</span>,
+      <span class="key">"sequencia"</span>: <span class="num">2</span>,
+      <span class="key">"siglaOrgao"</span>: <span class="str">"CE"</span>,
+      <span class="key">"descricaoSituacao"</span>: <span class="str">"Aguardando Designação de Relator"</span>,
+      <span class="key">"descricaoTramitacao"</span>: <span class="str">"Recebimento pela Comissão"</span>,
+      <span class="key">"despacho"</span>: <span class="str">"Recebida pela Comissão de Educação"</span>,
+      <span class="key">"url"</span>: <span class="str">"https://www.camara.leg.br/..."</span>
+    },
+    {
+      <span class="key">"dataHora"</span>: <span class="str">"2026-03-25T16:10:00"</span>,
+      <span class="key">"sequencia"</span>: <span class="num">3</span>,
+      <span class="key">"siglaOrgao"</span>: <span class="str">"CE"</span>,
+      <span class="key">"descricaoSituacao"</span>: <span class="str">"Aprovada"</span>,
+      <span class="key">"descricaoTramitacao"</span>: <span class="str">"Aprovação"</span>,
+      <span class="key">"despacho"</span>: <span class="str">"Aprovada pela Comissão de Educação com substitutivo"</span>,
+      <span class="key">"url"</span>: <span class="str">"https://www.camara.leg.br/..."</span>
+    }
+  ]
+}</pre>
+
+          <div class="schema-block">
+            <div class="schema-block-header">Response fields — dados[ ]</div>
+            <div class="schema-field">
+              <span class="schema-field-name">sequencia</span
+              ><span class="schema-field-desc"
+                >Step number — ascending order means chronological</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">dataHora</span
+              ><span class="schema-field-desc"
+                >Date and time of this event</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">siglaOrgao</span
+              ><span class="schema-field-desc"
+                >Acronym of the body responsible for this step (committee,
+                Plenário, Mesa, Senate, etc.)</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">descricaoTramitacao</span
+              ><span class="schema-field-desc"
+                >Type of action taken — e.g. "Aprovação", "Rejeição",
+                "Arquivamento"</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">descricaoSituacao</span
+              ><span class="schema-field-desc"
+                >Status of the proposal after this event</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">despacho</span
+              ><span class="schema-field-desc"
+                >Official dispatch text — often explains the decision in plain
+                language</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">url</span
+              ><span class="schema-field-desc"
+                >Link to the full document or minute on the Câmara website</span
+              >
+            </div>
+          </div>
+
+          <div class="callout warn">
+            <div class="callout-icon">⚠️</div>
+            <div class="callout-body">
+              <strong>Interpreting outcomes</strong>
+              The API does not have a single "approved/rejected" boolean. You
+              determine the final status by inspecting the
+              <code>descricaoTramitacao</code> and
+              <code>descricaoSituacao</code> of the <strong>last</strong> item
+              in the list — the entry with the highest <code>sequencia</code>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── VOTACOES ─── -->
+      <section id="votacoes">
+        <div class="section-number">Section 07</div>
+        <h2>Votações — voting records</h2>
+        <p>
+          While tramitações cover every administrative step,
+          <em>votações</em> are the formal votes — the plenary sessions and
+          committee sessions where deputies cast <em>Sim</em>, <em>Não</em>, or
+          <em>Abstenção</em>.
+        </p>
+
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method get">GET</span>
+            <h3>/votacoes</h3>
+          </div>
+
+          <code class="endpoint-url"
+            >https://dadosabertos.camara.leg.br/api/v2/votacoes?idProposicao=<span
+              style="color: #ffcb6b"
+              >{id}</span
+            ></code
+          >
+
+          <table class="param-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="param-name">idProposicao</span></td>
+                <td><span class="param-type">integer</span></td>
+                <td><span class="badge filter">filter</span></td>
+                <td>Filter votes linked to this proposal ID</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">dataInicio</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>Votes on or after this date</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">dataFim</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td>Votes on or before this date</td>
+              </tr>
+              <tr>
+                <td><span class="param-name">ordenarPor</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td><code>dataHoraInicio</code> or <code>id</code></td>
+              </tr>
+              <tr>
+                <td><span class="param-name">ordem</span></td>
+                <td><span class="param-type">string</span></td>
+                <td><span class="badge optional">optional</span></td>
+                <td><code>ASC</code> or <code>DESC</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <pre><span class="label">// Get all votes for proposal 2650431</span><span class="url">GET https://dadosabertos.camara.leg.br/api/v2/votacoes
+  ?idProposicao=2650431
+  &amp;ordenarPor=dataHoraInicio
+  &amp;ordem=DESC</span></pre>
+
+          <pre><span class="label">// Sample response</span>{
+  <span class="key">"dados"</span>: [
+    {
+      <span class="key">"id"</span>: <span class="str">"2650431-10"</span>,
+      <span class="key">"uri"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/votacoes/2650431-10"</span>,
+      <span class="key">"dataHoraInicio"</span>: <span class="str">"2026-03-25T16:05:00"</span>,
+      <span class="key">"dataHoraFim"</span>: <span class="str">"2026-03-25T16:12:00"</span>,
+      <span class="key">"siglaOrgao"</span>: <span class="str">"CE"</span>,
+      <span class="key">"descricao"</span>: <span class="str">"Votação do mérito do PL 512/2026"</span>,
+      <span class="key">"aprovacao"</span>: <span class="num">1</span>,       <span class="cmt">// 1 = approved, 0 = rejected</span>
+      <span class="key">"totalVotosSim"</span>: <span class="num">31</span>,
+      <span class="key">"totalVotosNao"</span>: <span class="num">8</span>,
+      <span class="key">"totalVotosAbstencao"</span>: <span class="num">2</span>
+    }
+  ]
+}</pre>
+
+          <hr class="divider" />
+
+          <div class="endpoint-header" style="margin-top: 1.5rem">
+            <span class="method get">GET</span>
+            <h3>/votacoes/{id}/votos</h3>
+          </div>
+
+          <code class="endpoint-url"
+            >https://dadosabertos.camara.leg.br/api/v2/votacoes/<span
+              style="color: #ffcb6b"
+              >{id}</span
+            >/votos</code
+          >
+
+          <p class="endpoint-desc">
+            Returns each individual deputy's vote for a specific votação. Use
+            the <code>id</code> from the list above.
+          </p>
+
+          <pre><span class="label">// Get individual votes</span><span class="url">GET https://dadosabertos.camara.leg.br/api/v2/votacoes/2650431-10/votos</span></pre>
+
+          <pre><span class="label">// Sample response</span>{
+  <span class="key">"dados"</span>: [
+    {
+      <span class="key">"tipoVoto"</span>: <span class="str">"Sim"</span>,
+      <span class="key">"dataRegistroVoto"</span>: <span class="str">"2026-03-25T16:07:13"</span>,
+      <span class="key">"deputado_"</span>: {
+        <span class="key">"id"</span>: <span class="num">204501</span>,
+        <span class="key">"uri"</span>: <span class="str">"https://dadosabertos.camara.leg.br/api/v2/deputados/204501"</span>,
+        <span class="key">"nome"</span>: <span class="str">"Alencar Santana"</span>,
+        <span class="key">"siglaPartido"</span>: <span class="str">"PT"</span>,
+        <span class="key">"siglaUf"</span>: <span class="str">"SP"</span>
+      }
+    },
+    {
+      <span class="key">"tipoVoto"</span>: <span class="str">"Não"</span>,
+      <span class="key">"dataRegistroVoto"</span>: <span class="str">"2026-03-25T16:07:45"</span>,
+      <span class="key">"deputado_"</span>: {
+        <span class="key">"id"</span>: <span class="num">220554</span>,
+        <span class="key">"nome"</span>: <span class="str">"Alexandre Lindenmeyer"</span>,
+        <span class="key">"siglaPartido"</span>: <span class="str">"PT"</span>,
+        <span class="key">"siglaUf"</span>: <span class="str">"RS"</span>
+      }
+    }
+  ]
+}</pre>
+
+          <div class="schema-block">
+            <div class="schema-block-header">tipoVoto possible values</div>
+            <div class="schema-field">
+              <span class="schema-field-name">Sim</span
+              ><span class="schema-field-desc">Deputy voted in favor</span>
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">Não</span
+              ><span class="schema-field-desc">Deputy voted against</span>
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">Abstenção</span
+              ><span class="schema-field-desc">Deputy chose to abstain</span>
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">Art. 17</span
+              ><span class="schema-field-desc"
+                >Deputy was exempt from voting due to procedural rule</span
+              >
+            </div>
+            <div class="schema-field">
+              <span class="schema-field-name">Obstrução</span
+              ><span class="schema-field-desc"
+                >Deputy voted to obstruct / procedural block</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── STATUS CODES ─── -->
+      <section id="status-codes">
+        <div class="section-number">Section 08</div>
+        <h2>Status reference</h2>
+        <p>
+          Key values you will encounter in <code>descricaoTramitacao</code> and
+          <code>descricaoSituacao</code> fields — and what they mean in
+          practice.
+        </p>
+
+        <div class="status-grid">
+          <div class="status-card approve">
+            <h4>✅ Approval keywords</h4>
+            <p>
+              <strong>Aprovada</strong> — passed by a committee or the full
+              Plenary<br />
+              <strong>Aprovada com Substitutivo</strong> — approved with
+              amendments<br />
+              <strong>Sancionada / Promulgada</strong> — signed into law
+            </p>
+          </div>
+          <div class="status-card reject">
+            <h4>❌ Rejection keywords</h4>
+            <p>
+              <strong>Rejeitada</strong> — voted down by a committee or
+              Plenary<br />
+              <strong>Prejudicada</strong> — moot due to another decision<br />
+              <strong>Vetada</strong> — vetoed by the Executive after passing
+            </p>
+          </div>
+          <div class="status-card pend">
+            <h4>⏳ In-progress keywords</h4>
+            <p>
+              <strong>Aguardando Designação de Relator</strong> — waiting for a
+              rapporteur<br />
+              <strong>Em Pauta</strong> — on the agenda for a session<br />
+              <strong>Em Votação</strong> — currently being voted on
+            </p>
+          </div>
+          <div class="status-card arch">
+            <h4>🗄️ Archiving keywords</h4>
+            <p>
+              <strong>Arquivada</strong> — shelved at end of legislature<br />
+              <strong>Retirada pelo Autor</strong> — withdrawn by the lead
+              author<br />
+              <strong>Encerrada</strong> — process fully closed
+            </p>
+          </div>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-icon">ℹ️</div>
+          <div class="callout-body">
+            <strong>Full reference codes</strong>
+            To get the complete machine-readable list of situation codes, call:
+            <code>GET /referencias/proposicoes/codSituacao</code>. This returns
+            every <code>cod</code> + <code>nome</code> pair you can use as a
+            <code>codSituacao</code> filter.
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── RECIPES ─── -->
+      <section id="recipe-latest">
+        <div class="section-number">Section 09</div>
+        <h2>Recipe: latest proposals today</h2>
+        <p>
+          A complete JavaScript snippet showing how to fetch the 20 most recent
+          proposals submitted in 2026.
+        </p>
+
+        <pre><span class="label">// JavaScript — fetch latest proposals</span><span class="kw">const</span> <span class="var">BASE</span> = <span class="str">"https://dadosabertos.camara.leg.br/api/v2"</span>;
+
+<span class="kw">async function</span> <span class="var">getLatestProposals</span>({ tipo = <span class="str">"PL"</span>, itens = <span class="num">20</span> } = {}) {
+  <span class="kw">const</span> <span class="var">params</span> = <span class="kw">new</span> URLSearchParams({
+    siglaTipo: tipo,
+    dataApresentacaoInicio: <span class="str">"2026-01-01"</span>,
+    ordenarPor: <span class="str">"dataApresentacao"</span>,
+    ordem: <span class="str">"DESC"</span>,
+    itens,
+  });
+
+  <span class="kw">const</span> <span class="var">res</span> = <span class="kw">await</span> fetch(`${<span class="var">BASE</span>}/proposicoes?${<span class="var">params</span>}`);
+  <span class="kw">const</span> { dados } = <span class="kw">await</span> <span class="var">res</span>.json();
+  <span class="kw">return</span> dados;
+}
+
+<span class="cmt">// Usage</span>
+<span class="kw">const</span> <span class="var">proposals</span> = <span class="kw">await</span> <span class="var">getLatestProposals</span>();
+<span class="var">console</span>.log(<span class="var">proposals</span>.map(p => `${p.siglaTipo} ${p.numero}/${p.ano} — ${p.ementa}`));</pre>
+      </section>
+
+      <section id="recipe-deputy">
+        <div class="section-number">Section 10</div>
+        <h2>Recipe: proposals by a specific deputy</h2>
+
+        <pre><span class="label">// JavaScript — find a deputy then get their proposals</span><span class="kw">async function</span> <span class="var">getProposalsByDeputy</span>(deputyName) {
+  <span class="cmt">// 1. Find the deputy</span>
+  <span class="kw">const</span> <span class="var">depRes</span> = <span class="kw">await</span> fetch(`${<span class="var">BASE</span>}/deputados?nome=${encodeURIComponent(deputyName)}&amp;itens=5`);
+  <span class="kw">const</span> { dados: deps } = <span class="kw">await</span> <span class="var">depRes</span>.json();
+
+  <span class="kw">if</span> (!deps.length) <span class="kw">throw new</span> Error(<span class="str">"Deputy not found"</span>);
+  <span class="kw">const</span> deputy = deps[<span class="num">0</span>];
+
+  <span class="cmt">// 2. Get their proposals</span>
+  <span class="kw">const</span> <span class="var">params</span> = <span class="kw">new</span> URLSearchParams({
+    idDeputadoAutor: deputy.id,
+    ordenarPor: <span class="str">"dataApresentacao"</span>,
+    ordem: <span class="str">"DESC"</span>,
+    itens: <span class="num">20</span>,
+  });
+
+  <span class="kw">const</span> <span class="var">propRes</span> = <span class="kw">await</span> fetch(`${<span class="var">BASE</span>}/proposicoes?${<span class="var">params</span>}`);
+  <span class="kw">const</span> { dados: proposals } = <span class="kw">await</span> <span class="var">propRes</span>.json();
+
+  <span class="kw">return</span> { deputy, proposals };
+}
+
+<span class="kw">const</span> { deputy, proposals } = <span class="kw">await</span> <span class="var">getProposalsByDeputy</span>(<span class="str">"Tabata Amaral"</span>);
+console.log(<span class="str">`${deputy.nome} — ${proposals.length} proposals found`</span>);</pre>
+      </section>
+
+      <section id="recipe-full">
+        <div class="section-number">Section 11</div>
+        <h2>Recipe: full proposal history</h2>
+        <p>
+          Given a proposal ID, fetch its details, all authors, and the complete
+          tramitação — in parallel.
+        </p>
+
+        <pre><span class="label">// JavaScript — fetch everything about a proposal at once</span><span class="kw">async function</span> <span class="var">getFullProposal</span>(id) {
+  <span class="kw">const</span> [detailRes, authorsRes, tramRes] = <span class="kw">await</span> Promise.all([
+    fetch(`${<span class="var">BASE</span>}/proposicoes/${id}`),
+    fetch(`${<span class="var">BASE</span>}/proposicoes/${id}/autores`),
+    fetch(`${<span class="var">BASE</span>}/proposicoes/${id}/tramitacoes`),
+  ]);
+
+  <span class="kw">const</span> [{ dados: detail }, { dados: authors }, { dados: events }] =
+    <span class="kw">await</span> Promise.all([detailRes.json(), authorsRes.json(), tramRes.json()]);
+
+  <span class="cmt">// Last tramitação = current / final status</span>
+  <span class="kw">const</span> lastEvent = events.at(-<span class="num">1</span>);
+  <span class="kw">const</span> isApproved = lastEvent?.descricaoTramitacao
+    ?.toLowerCase().includes(<span class="str">"aprovad"</span>);
+
+  <span class="kw">return</span> {
+    proposal: detail,
+    authors,
+    history: events,
+    currentStatus: lastEvent?.descricaoSituacao,
+    approved: isApproved,
+  };
+}
+
+<span class="cmt">// Usage</span>
+<span class="kw">const</span> full = <span class="kw">await</span> <span class="var">getFullProposal</span>(<span class="num">2650431</span>);
+console.log(full.currentStatus);   <span class="cmt">// → "Aprovada"</span>
+console.log(full.authors[<span class="num">0</span>].nome); <span class="cmt">// → "Alencar Santana"</span>
+console.log(full.history.length);  <span class="cmt">// → 7 (steps in tramitação)</span></pre>
+      </section>
+    </main>
+
+    <script>
+      // Highlight active sidebar link based on scroll
+      const links = document.querySelectorAll("aside nav a");
+      const sections = [...document.querySelectorAll("section, .hero")];
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              const id = e.target.id || "intro";
+              links.forEach((l) => {
+                l.classList.toggle(
+                  "active",
+                  l.getAttribute("href") === `#${id}`,
+                );
+              });
+            }
+          });
+        },
+        { rootMargin: "-10% 0px -80% 0px" },
+      );
+
+      sections.forEach((s) => io.observe(s));
+    </script>
+  </body>
+</html>

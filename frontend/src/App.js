@@ -3,7 +3,7 @@ import Header from "./components/Header";
 import StoriesBar from "./components/StoriesBar";
 import Feed from "./components/Feed";
 import FollowModal from "./components/FollowModal";
-import { fetchDeputies, fetchFeed, fetchActivityFeed } from "./api";
+import { fetchDeputies, fetchUnifiedFeed } from "./api";
 import "./App.css";
 
 const STORAGE_KEY = "deolhoneles_followed";
@@ -27,7 +27,6 @@ function App() {
   const [followedIds, setFollowedIds] = useState(loadFollowedIds);
   const [modalOpen, setModalOpen] = useState(false);
   const [deputyFilter, setDeputyFilter] = useState(null);
-  const [feedMode, setFeedMode] = useState("deputies");
 
   const [feedItems, setFeedItems] = useState([]);
   const [feedPage, setFeedPage] = useState(0);
@@ -54,16 +53,13 @@ function App() {
     [deputies, followedSet],
   );
 
-  // Stable key for feed query — changes when deputy selection or feed mode changes
+  // Stable key for feed query — changes when deputy selection changes
   const feedKey = useMemo(() => {
-    const prefix = feedMode === "activities" ? "a" : "d";
-    if (deputyFilter) return `${prefix}:${deputyFilter}`;
-    return `${prefix}:f:${[...followedIds].sort((a, b) => a - b).join(",")}`;
-  }, [deputyFilter, followedIds, feedMode]);
+    if (deputyFilter) return `f:${deputyFilter}`;
+    return `f:${[...followedIds].sort((a, b) => a - b).join(",")}`;
+  }, [deputyFilter, followedIds]);
 
-  const fetchFn = feedMode === "activities" ? fetchActivityFeed : fetchFeed;
-
-  // Fetch feed when deputy selection or feed mode changes
+  // Fetch feed when deputy selection changes
   useEffect(() => {
     let cancelled = false;
     const ids = deputyFilter ? [deputyFilter] : [...followedIds];
@@ -75,7 +71,7 @@ function App() {
     if (ids.length === 0) return;
 
     setFeedLoading(true);
-    fetchFn(ids, 0, FEED_PAGE_SIZE)
+    fetchUnifiedFeed(ids, 0, FEED_PAGE_SIZE)
       .then((data) => {
         if (cancelled) return;
         setFeedItems(data.content);
@@ -101,7 +97,7 @@ function App() {
     if (ids.length === 0) return;
 
     setFeedLoading(true);
-    fetchFn(ids, feedPage, FEED_PAGE_SIZE)
+    fetchUnifiedFeed(ids, feedPage, FEED_PAGE_SIZE)
       .then((data) => {
         setFeedItems((prev) => [...prev, ...data.content]);
         setFeedHasMore(!data.last);
@@ -109,7 +105,7 @@ function App() {
       })
       .catch(console.error)
       .finally(() => setFeedLoading(false));
-  }, [feedLoading, feedHasMore, deputyFilter, followedIds, feedPage, fetchFn]);
+  }, [feedLoading, feedHasMore, deputyFilter, followedIds, feedPage]);
 
   const followed = deputiesWithFollow.filter((d) => d.following);
 
@@ -135,22 +131,6 @@ function App() {
         }
         onAddClick={() => setModalOpen(true)}
       />
-      <div className="feed-mode-bar">
-        <div className="feed-mode-toggle">
-          <button
-            className={`feed-mode-btn ${feedMode === "deputies" ? "active" : ""}`}
-            onClick={() => setFeedMode("deputies")}
-          >
-            Deputados
-          </button>
-          <button
-            className={`feed-mode-btn ${feedMode === "activities" ? "active" : ""}`}
-            onClick={() => setFeedMode("activities")}
-          >
-            Atividades
-          </button>
-        </div>
-      </div>
 
       <main className="main">
         <Feed
@@ -158,7 +138,6 @@ function App() {
           hasMore={feedHasMore}
           loading={feedLoading}
           onLoadMore={loadMoreFeed}
-          feedMode={feedMode}
         />
       </main>
 

@@ -6,22 +6,26 @@ import java.time.LocalDate;
 public record ActivityResponse(
         Long id,
         String title,
+        String subtitle,
         String summary,
         String author,
         String category,
         LocalDate voteDate,
-        String externalId
+        String externalId,
+        String sourceProposalId
 ) {
 
     public static ActivityResponse from(LegislativeActivity entity) {
         return new ActivityResponse(
                 entity.getId(),
                 entity.getTitle(),
+                entity.getSubtitle(),
                 entity.getSummary(),
                 entity.getAuthor(),
                 entity.getCategory(),
                 entity.getVoteDate(),
-                entity.getExternalId()
+                entity.getExternalId(),
+                entity.getSourceProposalId()
         );
     }
 }

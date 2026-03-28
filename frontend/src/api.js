@@ -6,22 +6,12 @@ export async function fetchDeputies(page = 0, size = 100) {
   return res.json();
 }
 
-export async function fetchFeed(deputyIds, page = 0, size = 10) {
-  const res = await fetch(`${API_BASE}/feed/deputies?page=${page}&size=${size}`, {
+export async function fetchUnifiedFeed(deputyIds, page = 0, size = 10) {
+  const res = await fetch(`${API_BASE}/feed?page=${page}&size=${size}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ deputyIds }),
   });
   if (!res.ok) throw new Error("Failed to fetch feed");
-  return res.json();
-}
-
-export async function fetchActivityFeed(deputyIds, page = 0, size = 10) {
-  const res = await fetch(`${API_BASE}/feed/activities?page=${page}&size=${size}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ deputyIds }),
-  });
-  if (!res.ok) throw new Error("Failed to fetch activity feed");
   return res.json();
 }

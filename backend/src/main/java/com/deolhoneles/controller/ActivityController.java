@@ -2,6 +2,7 @@ package com.deolhoneles.controller;
 
 import com.deolhoneles.dto.ActivityRequest;
 import com.deolhoneles.dto.ActivityResponse;
+import com.deolhoneles.dto.EnrichRequest;
 import com.deolhoneles.dto.PageResponse;
 import com.deolhoneles.service.ActivityService;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,6 +58,12 @@ public class ActivityController {
     @PutMapping("/{id}")
     public ActivityResponse updateActivity(@PathVariable Long id, @Valid @RequestBody ActivityRequest request) {
         return activityService.updateActivity(id, request);
+    }
+
+    @PatchMapping("/{id}/enrich")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void enrichActivity(@PathVariable Long id, @Valid @RequestBody EnrichRequest request) {
+        activityService.enrich(id, request.subtitle(), request.summary(), request.sourceProposalId());
     }
 
     @DeleteMapping("/{id}")

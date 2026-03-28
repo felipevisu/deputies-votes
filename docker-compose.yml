@@ -32,5 +32,16 @@ services:
     depends_on:
       - backend
 
+  dashboard:
+    build: ./batch
+    ports:
+      - "5055:5055"
+    environment:
+      BACKEND_URL: http://backend:8080
+    env_file:
+      - ./batch/.env
+    depends_on:
+      - backend
+
 volumes:
   pgdata:

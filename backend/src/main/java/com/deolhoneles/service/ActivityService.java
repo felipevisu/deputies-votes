@@ -68,6 +68,16 @@ public class ActivityService {
         activityRepository.deleteById(id);
     }
 
+    @Transactional
+    public void enrich(Long id, String subtitle, String summary, String sourceProposalId) {
+        LegislativeActivity activity = activityRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Activity not found: " + id));
+        activity.setSubtitle(subtitle);
+        activity.setSummary(summary);
+        activity.setSourceProposalId(sourceProposalId);
+        activityRepository.save(activity);
+    }
+
     private void applyRequest(LegislativeActivity activity, ActivityRequest request) {
         activity.setTitle(request.title());
         activity.setSummary(request.summary());
@@ -75,5 +85,6 @@ public class ActivityService {
         activity.setCategory(request.category());
         activity.setVoteDate(request.voteDate());
         activity.setExternalId(request.externalId());
+        activity.setVoteRound(request.voteRound());
     }
 }
